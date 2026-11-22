@@ -1,0 +1,10 @@
+## Interface: 16001
+## Title: Forever Macro Dropdown
+## Notes: Create action-bar macros that open a vertical or horizontal popup bar of spells, items, toys and macros.
+## Version: 1.0.0
+## SavedVariables: ForeverMacroDropdownDB
+## IconTexture: 134400
+
+Core.lua
+Popup.lua
+Config.lua
