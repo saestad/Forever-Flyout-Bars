@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.2
+
+- Clearer addon description in the in-game AddOns list.
+
 ## 2.0.1
 
 - Published automatically to CurseForge. The addon folder in the download stays `ForeverMacroDropdown`, and the version number comes from the release tag.
