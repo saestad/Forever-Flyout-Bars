@@ -14,16 +14,16 @@ Custom flyouts for World of Warcraft: Forever. Each flyout is a macro you put on
 
 ## Install
 
-1. Download the latest version from [GitHub](https://github.com/saestad/ForeverMacroDropdown): **Code > Download ZIP**, or a release if there is one.
+1. Download the latest version from [GitHub](https://github.com/saestad/Forever-Flyout-Macros): **Code > Download ZIP**, or a release if there is one.
 2. Unzip it into `World of Warcraft\_forever_\Interface\AddOns\`.
-3. **Rename the folder to `ForeverMacroDropdown`.** GitHub ZIPs unpack as `ForeverMacroDropdown-main`, and WoW only loads the addon when the folder name matches `ForeverMacroDropdown.toc`. (The folder keeps the addon's original name, Forever Macro Dropdown, so existing settings carry over.)
+3. **Rename the folder to `ForeverMacroDropdown`.** GitHub ZIPs unpack as `Forever-Flyout-Macros-main`, and WoW only loads the addon when the folder name matches `ForeverMacroDropdown.toc`. (The folder keeps the addon's original name, Forever Macro Dropdown, so existing settings carry over.)
 4. Restart the game or type `/reload`.
 
-Or clone it straight into the AddOns folder:
+Or clone it straight into the AddOns folder. Give the folder name at the end, as below: without it, git names the folder after the repo and WoW won't load the addon.
 
 ```
 cd "World of Warcraft\_forever_\Interface\AddOns"
-git clone https://github.com/saestad/ForeverMacroDropdown.git
+git clone https://github.com/saestad/Forever-Flyout-Macros.git ForeverMacroDropdown
 ```
 
 The `.toc` targets WoW: Forever patch 1.60.1 (`## Interface: 16001`). After a game patch, if the addon shows as out of date or incompatible, run `/dump select(4, GetBuildInfo())` in game and put that number in the `## Interface:` line.
@@ -149,7 +149,7 @@ Bars and settings are saved account-wide in `WTF\Account\<account>\SavedVariable
 
 ## Bugs and ideas
 
-Report bugs or suggest features in [GitHub issues](https://github.com/saestad/ForeverMacroDropdown/issues). Please include:
+Report bugs or suggest features in [GitHub issues](https://github.com/saestad/Forever-Flyout-Macros/issues). Please include:
 
 - the addon version (shown in the editor's title bar and in Options > AddOns)
 - what you did, what you expected, and what happened
