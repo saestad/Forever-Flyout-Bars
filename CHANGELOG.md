@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- The addon folder is now `Flyout-Bars` (was `ForeverMacroDropdown`). The download also contains a small `ForeverMacroDropdown` folder ("Flyout Bars - old settings" in the AddOns list): it loads the bars saved by older versions, and Flyout Bars copies them over on the first login and says so in chat. Keep it enabled. It also stops an old copy of the addon from loading next to the new one.
+- First login after installing: the bar editor opens together with the macro window, with an example bar ("Flyout Example", holding the Hearthstone) to show how it works. Existing users who update don't get the example bar or the auto-open.
+
 ## 2.0.2
 
 - Clearer addon description in the in-game AddOns list.

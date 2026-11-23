@@ -6,8 +6,9 @@
 ## X-Website: https://github.com/saestad/Forever-Flyout-Bars
 ## X-License: MIT
 ## Category: Action Bars
-## SavedVariables: ForeverMacroDropdownDB
-## IconTexture: Interface\AddOns\ForeverMacroDropdown\Media\Icon
+## SavedVariables: FlyoutBarsDB
+## OptionalDeps: ForeverMacroDropdown
+## IconTexture: Interface\AddOns\Flyout-Bars\Media\Icon
 ## AddonCompartmentFunc: ForeverMacroDropdown_OnAddonCompartmentClick
 ## AddonCompartmentFuncOnEnter: ForeverMacroDropdown_OnAddonCompartmentEnter
 ## AddonCompartmentFuncOnLeave: ForeverMacroDropdown_OnAddonCompartmentLeave

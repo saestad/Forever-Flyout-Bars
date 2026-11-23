@@ -50,17 +50,18 @@ The rest of this page is the full reference: every option, command and limit.
 
 1. On [GitHub](https://github.com/saestad/Forever-Flyout-Bars), choose **Code > Download ZIP**. (Not the "Source code" ZIPs on the Releases page: they have the same folder-name problem.)
 2. Unzip it into `World of Warcraft\_forever_\Interface\AddOns\`.
-3. **Rename the folder to `ForeverMacroDropdown`.** GitHub ZIPs unpack as `Forever-Flyout-Bars-main`, and WoW only loads the addon when the folder name matches `ForeverMacroDropdown.toc`. (The folder keeps the addon's original name, Forever Macro Dropdown, so existing settings carry over.)
+3. **Rename the folder to `Flyout-Bars`.** GitHub ZIPs unpack as `Forever-Flyout-Bars-main`, and WoW only loads the addon when the folder name matches `Flyout-Bars.toc`.
+   **Updating from 2.0.x or older?** Also move `Legacy\ForeverMacroDropdown` out into the AddOns folder, replacing your old `ForeverMacroDropdown` folder. It loads your old bars so Flyout Bars can copy them over (see [Saved settings](#saved-settings)).
 4. Restart the game or type `/reload`.
 
 Or clone it straight into the AddOns folder. Give the folder name at the end, as below: without it, git names the folder after the repo and WoW won't load the addon.
 
 ```
 cd "World of Warcraft\_forever_\Interface\AddOns"
-git clone https://github.com/saestad/Forever-Flyout-Bars.git ForeverMacroDropdown
+git clone https://github.com/saestad/Forever-Flyout-Bars.git Flyout-Bars
 ```
 
-The `.toc` targets WoW: Forever patch 1.60.1 (`## Interface: 16001`). After a game patch, if the addon shows as out of date or incompatible, run `/dump select(4, GetBuildInfo())` in game and put that number in the `## Interface:` line.
+The `.toc` targets WoW: Forever patch 1.60.1 (`## Interface: 16001`). After a game patch, if the addon shows as out of date or incompatible, run `/dump select(4, GetBuildInfo())` in game and put that number in the `## Interface:` line of `Flyout-Bars.toc` (and `Legacy\ForeverMacroDropdown\ForeverMacroDropdown.toc`).
 
 ## Opening the addon
 
@@ -152,7 +153,7 @@ On login a single chat line shows the version and the two main commands. Turn it
 
 ## Troubleshooting
 
-- **The addon isn't in the AddOns list, or is marked out of date.** Check the folder is named exactly `ForeverMacroDropdown`. After a game patch, update the `## Interface:` number (see Install).
+- **The addon isn't in the AddOns list, or is marked out of date.** Check the folder is named exactly `Flyout-Bars`. After a game patch, update the `## Interface:` number (see Install).
 - **The popup opens in the middle of the screen.** The macro isn't on a visible action button, or the addon hasn't noticed yet. Put the macro on a bar and run `/fbar scan`.
 - **The bar list shows a red icon.** That character doesn't have the macro yet (for example a character-only bar on a new character). Drag the macro icon onto an action bar to create it.
 - **"A macro named X exists but wasn't made by this addon."** You have your own macro with that name. Rename the bar or your macro.
@@ -162,7 +163,11 @@ On login a single chat line shows the version and the two main commands. Turn it
 
 ## Saved settings
 
-Bars and settings are saved account-wide in `WTF\Account\<account>\SavedVariables\ForeverMacroDropdown.lua`. To start over, log out and delete that file. This doesn't delete the macros; remove them in `/macro` (each one's text is `/click FMDToggle<number>`).
+Bars and settings are saved account-wide in `WTF\Account\<account>\SavedVariables\Flyout-Bars.lua`. To start over, log out and delete that file (and `ForeverMacroDropdown.lua`, or the old bars are copied over again). This doesn't delete the macros; remove them in `/macro` (each one's text is `/click FMDToggle<number>`).
+
+Up to 2.0.x the addon folder was called `ForeverMacroDropdown`, and WoW names the saved file after the folder. So the download also contains a small `ForeverMacroDropdown` folder, shown in the AddOns list as "Flyout Bars - old settings". It only loads the old file. On the first login with the new version, Flyout Bars copies the old bars over and says so in chat. The old file is kept as a backup. Keep it enabled until you've logged in once after updating.
+
+On the very first login after installing (no saved bars at all), the bar editor and macro window open by themselves, with an example bar, "Flyout Example", holding the Hearthstone.
 
 ## How it works
 
@@ -199,12 +204,12 @@ The version comes from the git tag. The `.toc` has `## Version: @project-version
    git push origin main
    git push origin v<version>
    ```
-   CurseForge packages every new tag it sees. A tag containing `beta` or `alpha` (such as `v2.1.0-beta1`) becomes a Beta or Alpha file; anything else is a Release. `.pkgmeta` sets the folder name (`ForeverMacroDropdown`) and leaves `tools/` out of the package.
+   CurseForge packages every new tag it sees. A tag containing `beta` or `alpha` (such as `v2.1.0-beta1`) becomes a Beta or Alpha file; anything else is a Release. `.pkgmeta` sets the folder name (`Flyout-Bars`), moves `Legacy/ForeverMacroDropdown` out to its own top-level folder, and leaves `tools/` out of the package.
 3. For the GitHub release, build the ZIP:
    ```
    powershell -ExecutionPolicy Bypass -File tools\build-release.ps1
    ```
-   This writes `dist\FlyoutBars-<tag>.zip` with a single `ForeverMacroDropdown/` folder inside, taking the version from the latest tag. If you add a file the game needs, add it to the list at the top of the script too.
+   This writes `dist\FlyoutBars-<tag>.zip` with the same two folders, `Flyout-Bars/` and `ForeverMacroDropdown/`, taking the version from the latest tag. If you add a file the game needs, add it to the list at the top of the script too.
 4. On GitHub, create a release from the tag, paste the changelog section, and attach the ZIP from `dist\`.
 
 When running the addon straight from a git clone, the version shows as `@project-version@`; packaged downloads show the real one.

@@ -1,4 +1,8 @@
-package-as: ForeverMacroDropdown
+package-as: Flyout-Bars
+
+# Ship the old-settings stub as its own top-level folder next to Flyout-Bars (see Legacy\ForeverMacroDropdown\Legacy.lua).
+move-folders:
+  Flyout-Bars/Legacy/ForeverMacroDropdown: ForeverMacroDropdown
 
 ignore:
   - tools

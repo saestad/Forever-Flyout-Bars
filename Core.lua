@@ -113,9 +113,27 @@ end
 -- Saved variables
 ---------------------------------------------------------------------------
 
+local function CopyDeep(t)
+    if type(t) ~= "table" then return t end
+    local c = {}
+    for k, v in pairs(t) do c[k] = CopyDeep(v) end
+    return c
+end
+
 function ns:InitDB()
-    local db = ForeverMacroDropdownDB or {}
-    ForeverMacroDropdownDB = db
+    local db = FlyoutBarsDB
+    -- Up to 2.0.x the data was saved under the folder name ForeverMacroDropdown. The small
+    -- ForeverMacroDropdown addon shipped alongside still loads it; copy it over once and leave
+    -- the original as a backup.
+    local old = _G.ForeverMacroDropdownDB
+    if db == nil and type(old) == "table" then
+        db = CopyDeep(old)
+        self.migrated = true
+    end
+    -- No saved data at all = first login on this account since installing the addon.
+    self.firstRun = db == nil
+    db = db or {}
+    FlyoutBarsDB = db
     db.bars = db.bars or {}
     db.nextId = db.nextId or 1
     db.minimap = db.minimap or {} -- LibDBIcon-compatible: { hide = bool, minimapPos = degrees }
@@ -528,6 +546,38 @@ function ns:PickupBarMacro(bar)
 end
 
 ---------------------------------------------------------------------------
+-- First run
+---------------------------------------------------------------------------
+
+local EXAMPLE_BAR_NAME = "Flyout Example"
+local EXAMPLE_ENTRIES = {
+    { type = "item", id = 6948 }, -- Hearthstone: every character has one
+}
+
+-- First login after installing: add an example bar and open the editor with the macro window.
+-- Waits until combat ends if needed. Existing users (who already have saved data) never see this.
+function ns:RunFirstTimeSetup()
+    if not self.firstRun or InCombatLockdown() then return end
+    self.firstRun = false
+
+    if #self.db.bars == 0 and self:ValidateName(EXAMPLE_BAR_NAME) then
+        local bar = self:CreateBar(EXAMPLE_BAR_NAME)
+        if bar then
+            for i, e in ipairs(EXAMPLE_ENTRIES) do bar.entries[i] = { type = e.type, id = e.id } end
+            self:BuildBar(bar)
+            self:SyncMacro(bar, false)
+            self.selectedBarId = bar.id
+        end
+    end
+
+    self:OpenConfig()
+    if self:GetBar(self.selectedBarId or 0) then
+        self:Notify("Here's an example bar. Drag spells, items, toys, mounts or macros into it, "
+            .. "then drag its icon onto an action bar. Delete it any time.", "info")
+    end
+end
+
+---------------------------------------------------------------------------
 -- Events
 ---------------------------------------------------------------------------
 
@@ -555,6 +605,9 @@ events:SetScript("OnEvent", function(self, event, arg1)
     elseif event == "PLAYER_LOGIN" then
         ns:BuildAll()
         if ns.InitLauncher then ns:InitLauncher() end
+        if ns.migrated then
+            ns:Print(("Brought over %d bar(s) from the old ForeverMacroDropdown folder."):format(#ns.db.bars))
+        end
         if ns.db.loginMessage ~= false then
             print(("|cff33ccff%s|r%s - |cffffd100/fbar|r to edit bars, |cffffd100/fbar settings|r for settings."):format(
                 ns.TITLE, ns.VERSION ~= "" and (" v" .. ns.VERSION) or ""))
@@ -565,7 +618,12 @@ events:SetScript("OnEvent", function(self, event, arg1)
         -- (not on UPDATE_MACROS: our own EditMacro calls fire that event)
         ns:SyncAllMacros()
         ns:RequestScan()
+        if ns.firstRun then
+            -- a moment after the loading screen, once macros and the UI are ready
+            C_Timer.After(2, function() ns:RunFirstTimeSetup() end)
+        end
     elseif event == "PLAYER_REGEN_ENABLED" then
+        if ns.firstRun then ns:RunFirstTimeSetup() end
         if ns.pendingRefresh then
             ns.pendingRefresh = false
             ns:BuildAll()

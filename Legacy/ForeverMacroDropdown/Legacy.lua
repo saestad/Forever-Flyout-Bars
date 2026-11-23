@@ -1,0 +1,9 @@
+-- Flyout Bars - old settings
+-- Up to 2.0.x the addon lived in a folder called ForeverMacroDropdown, and WoW names the
+-- saved-variables file after the folder (SavedVariables\ForeverMacroDropdown.lua).
+-- This folder keeps that name so the game still loads the old file into ForeverMacroDropdownDB.
+-- Flyout-Bars lists this addon in OptionalDeps, so it loads first, and copies the data into
+-- FlyoutBarsDB on its first login. The old data is left untouched as a backup.
+--
+-- Shipping this folder under the old name also replaces the old ForeverMacroDropdown.toc,
+-- so a leftover copy of the old addon in this folder no longer loads next to Flyout-Bars.

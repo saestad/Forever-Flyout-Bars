@@ -1,0 +1,12 @@
+## Interface: 16001
+## Title: Flyout Bars - old settings
+## Notes: Part of Flyout Bars. Brings your bars over from versions before the addon folder was renamed to Flyout-Bars. Keep it enabled; it does nothing else.
+## Version: @project-version@
+## Author: saestad
+## X-Website: https://github.com/saestad/Forever-Flyout-Bars
+## X-License: MIT
+## Category: Action Bars
+## SavedVariables: ForeverMacroDropdownDB
+## IconTexture: Interface\AddOns\Flyout-Bars\Media\Icon
+
+Legacy.lua
