@@ -2,19 +2,49 @@
 
 # Flyout Bars
 
-Custom flyouts for World of Warcraft: Forever. Each flyout is a macro you put on an action bar: click it, and a popup bar of spells, items, toys, mounts and macros flies out, like Blizzard's mage portal flyout. Works in combat.
+**Build your own flyouts.** Put one button on your action bar, click it, and a bar of spells, items, toys, mounts and macros pops out next to it, like the mage portal flyout. Click a button in it to use it. Works in combat.
 
 <br clear="left">
 
-- One action-bar slot opens a popup of up to 24 buttons, anchored to that slot.
-- Opens up, down, left or right, in one or more columns/rows.
-- Shows cooldowns, item counts, and tints buttons when you lack power or can't use them, like the default bars.
-- Works with Blizzard bars, Bartender4 and ElvUI.
-- Edit bars in a window that opens attached to the macro window (`/macro`). The popup stays open while you edit, so you see changes on the bar.
+Use it to free up action bar slots: all your mounts, portals, hearthstones, food, buffs or profession tools behind one button each.
+
+## Why another flyout addon?
+
+I've tried several addons like this one, but none felt polished or easy enough to use, so I spun up my own version with ease of use in mind. A few guildmates liked it, so I put it up on CurseForge too.
+
+## Features
+
+- **Up to 24 buttons per flyout**, with as many flyouts as you have macro slots
+- **Opens up, down, left or right**, as a single line or a grid with as many columns/rows as you want
+- **Anything you can drag**: spells, items, toys, mounts and your own macros
+- **Shows cooldowns and item counts**, and tints buttons when you lack mana or can't use them, just like Blizzard's action bars
+- **Works in combat**: opening the flyout and casting from it are fully supported
+- **Sits next to the action button you clicked** and matches its size, on Blizzard bars, Bartender4 and ElvUI
+- **Closes the way you'd expect**: click the button again, press Escape, or click somewhere else. Auto-hide and close-after-use are on by default and can be turned off per flyout.
+- **Account-wide or per character**: each flyout can be a general or character-specific macro
+
+## Easy to set up
+
+Type **/fbar** and the editor opens next to Blizzard's macro window.
+
+1. Create a flyout and give it a name.
+2. Drag spells, items, toys, mounts or macros into its grid. You can also type a name or ID.
+3. Drag the flyout's icon onto your action bar.
+
+While the editor is open, your flyouts stay open, so you can see every change on your action bar as you make it. Drag to reorder, right-click to remove. The first entry sets the button's icon and cooldown.
+
+The editor makes room for the spellbook and professions windows, so you can drag spells straight across.
+
+Good to know:
+- Flyouts can only be edited outside combat, a Blizzard restriction. Using them works in combat.
+- Each flyout uses one macro slot. The addon manages that macro's text, so don't edit it by hand.
+- **Upgrading from Forever Macro Dropdown?** This is the same addon under its new name. Your existing bars and macros carry over.
+
+The rest of this page is the full reference: every option, command and limit.
 
 ## Install
 
-**Easiest:** download `FlyoutBars-<version>.zip` from the [Releases page](https://github.com/saestad/Forever-Flyout-Bars/releases) and unzip it into `World of Warcraft\_forever_\Interface\AddOns\`. It already contains the right folder. Restart the game or type `/reload`.
+**Easiest:** install it from CurseForge with the CurseForge app, or download `FlyoutBars-<version>.zip` from the [Releases page](https://github.com/saestad/Forever-Flyout-Bars/releases) and unzip it into `World of Warcraft\_forever_\Interface\AddOns\`. Both already contain the right folder. Restart the game or type `/reload`.
 
 **From the source code** (the latest, possibly unreleased, version):
 
@@ -160,15 +190,24 @@ Bars and settings are saved account-wide in `WTF\Account\<account>\SavedVariable
 
 ## Making a release
 
-1. Set the new version in `ForeverMacroDropdown.toc` (`## Version:`) and add a section for it at the top of `CHANGELOG.md`. Use a major version (3.0.0) when something players rely on stops working, such as a removed command.
-2. Build the ZIP:
+The version comes from the git tag. The `.toc` has `## Version: @project-version@`, which the CurseForge packager replaces with the tag name, so don't change that line.
+
+1. Add a section for the new version at the top of `CHANGELOG.md` and commit it. Use a major version (3.0.0) when something players rely on stops working, such as a removed command.
+2. Tag the commit and push both:
+   ```
+   git tag -a v<version> -m "Flyout Bars <version>"
+   git push origin main
+   git push origin v<version>
+   ```
+   CurseForge packages every new tag it sees. A tag containing `beta` or `alpha` (such as `v2.1.0-beta1`) becomes a Beta or Alpha file; anything else is a Release. `.pkgmeta` sets the folder name (`ForeverMacroDropdown`) and leaves `tools/` out of the package.
+3. For the GitHub release, build the ZIP:
    ```
    powershell -ExecutionPolicy Bypass -File tools\build-release.ps1
    ```
-   This writes `dist\FlyoutBars-<version>.zip` with a single `ForeverMacroDropdown/` folder inside. If you add a file the game needs, add it to the list at the top of the script too.
-3. Commit, push, and tag the commit: `git tag -a v<version> -m "Flyout Bars <version>"`, then `git push origin v<version>`.
+   This writes `dist\FlyoutBars-<tag>.zip` with a single `ForeverMacroDropdown/` folder inside, taking the version from the latest tag. If you add a file the game needs, add it to the list at the top of the script too.
 4. On GitHub, create a release from the tag, paste the changelog section, and attach the ZIP from `dist\`.
-5. On CurseForge, upload the same ZIP. Choose **Release** and the **WoW Forever** game version, and paste a short changelog.
+
+When running the addon straight from a git clone, the version shows as `@project-version@`; packaged downloads show the real one.
 
 For a bigger project-page icon: `powershell -ExecutionPolicy Bypass -File tools\make-icon.ps1 -OutTga dist\big.tga -OutPng dist\FlyoutBars-icon-512.png -Size 512`.
 
@@ -183,6 +222,10 @@ Report bugs or suggest features in [GitHub issues](https://github.com/saestad/Fo
 ## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md).
+
+## A note on AI
+
+I use generative AI as a tool while making this addon, mostly to help write and review code and documentation the same way I use it in my day job. I decide what the addon should do and how it should behave, read every change, test thoroughly and adjust before releasing updates. I know it's a sore subject for many, so I'd rather say it plainly. If something is broken, that's on me, so please report it. I care about not adding to the pile of low-effort AI junk out there.
 
 ## Author
 
