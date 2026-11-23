@@ -1,6 +1,6 @@
 ## Interface: 16001
 ## Title: Flyout Bars
-## Notes: Build your own flyout menus: one action button opens a dropdown bar of spells, items, toys, mounts and macros. Like the mage portal flyout. Works in combat.
+## Notes: Custom flyout and macro dropdown menu for action bars. One button opens a popup bar of any spell, item, toy, mount or macro, like the mage portal flyout. Put spells, items, toys, mounts and macros in flyouts: portal, teleport, hearthstone or buff menus.
 ## Version: @project-version@
 ## Author: saestad
 ## X-Website: https://github.com/saestad/Forever-Flyout-Bars
