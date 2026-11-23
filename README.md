@@ -8,6 +8,8 @@
 
 Use it to free up action bar slots: all your mounts, portals, hearthstones, food, buffs or profession tools behind one button each.
 
+**Looking for a macro dropdown, spell flyout or action bar popup menu?** That's what this does. Make a mount flyout, a portal or teleport menu, a toy and hearthstone menu, a food and buff bar, or a menu of profession tools, each opening from a single action button. Formerly known as **Forever Macro Dropdown**.
+
 ## Why another flyout addon?
 
 I've tried several addons like this one, but none felt polished or easy enough to use, so I spun up my own version with ease of use in mind. A few guildmates liked it, so I put it up on CurseForge too.
