@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.1
+
+- Published automatically to CurseForge. The addon folder in the download stays `ForeverMacroDropdown`, and the version number comes from the release tag.
+
 ## 2.0.0
 
 Renamed from Forever Macro Dropdown to **Flyout Bars**. The command is now `/fbar` (or `/flyoutbars`), replacing `/fmd`, `/ffm` and `/macrodropdown`. The folder name, saved settings and existing macros are unchanged.
