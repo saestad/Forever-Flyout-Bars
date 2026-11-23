@@ -10,7 +10,7 @@ Use it as a macro dropdown, spell flyout or action bar popup menu: a mount flyou
 
 ## Why another flyout addon?
 
-I've tried several addons like this one, but none felt polished, configurable or easy enough to use, so I spun up my own version with ease of use in mind. A few guildmates liked it, so I put it up on CurseForge too.
+I've tried several addons like this one, but none felt polished, configurable or easy enough to use, so I spun up my own version with ease of use in mind. A few guildmates liked it, so I put it up on [CurseForge](https://www.curseforge.com/wow/addons/flyout-bars) too.
 
 ## Features
 
@@ -44,7 +44,7 @@ The rest of this page is the full reference: every option, command and limit.
 
 ## Install
 
-**Easiest:** install it from CurseForge with the CurseForge app, or download `FlyoutBars-<version>.zip` from the [Releases page](https://github.com/saestad/Forever-Flyout-Bars/releases) and unzip it into `World of Warcraft\_forever_\Interface\AddOns\`. Both already contain the right folder. Restart the game or type `/reload`.
+**Easiest:** install it from [CurseForge](https://www.curseforge.com/wow/addons/flyout-bars) with the CurseForge app, or download `FlyoutBars-<version>.zip` from the [Releases page](https://github.com/saestad/Forever-Flyout-Bars/releases) and unzip it into `World of Warcraft\_forever_\Interface\AddOns\`. Both already contain the right folder. Restart the game or type `/reload`.
 
 **From the source code** (the latest, possibly unreleased, version):
 
