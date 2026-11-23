@@ -1,7 +1,7 @@
 ## Interface: 16001
 ## Title: Flyout Bars
 ## Notes: Custom flyouts for your action bars: one macro button opens a popup bar of spells, items, toys, mounts and macros. Vertical, horizontal or grid. Works in combat.
-## Version: 2.0.0
+## Version: @project-version@
 ## Author: saestad
 ## X-Website: https://github.com/saestad/Forever-Flyout-Bars
 ## X-License: MIT
