@@ -44,7 +44,7 @@ The rest of this page is the full reference: every option, command and limit.
 
 ## Install
 
-**Easiest:** install it from [CurseForge](https://www.curseforge.com/wow/addons/flyout-bars) with the CurseForge app, or download `FlyoutBars-<version>.zip` from the [Releases page](https://github.com/saestad/Forever-Flyout-Bars/releases) and unzip it into `World of Warcraft\_forever_\Interface\AddOns\`. Both already contain the right folder. Restart the game or type `/reload`.
+**Easiest:** install it from [CurseForge](https://www.curseforge.com/wow/addons/flyout-bars) with the [CurseForge app](https://www.curseforge.com/wow/addons/flyout-bars/install/9773715), or download `FlyoutBars-<version>.zip` from the [Releases page](https://github.com/saestad/Forever-Flyout-Bars/releases) and unzip it into `World of Warcraft\_forever_\Interface\AddOns\`. Both already contain the right folder. Restart the game or type `/reload`.
 
 **From the source code** (the latest, possibly unreleased, version):
 
