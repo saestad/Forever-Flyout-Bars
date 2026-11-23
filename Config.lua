@@ -491,6 +491,12 @@ function ns:CreateConfig()
         PlaySound(SOUNDKIT and SOUNDKIT.IG_CHARACTER_INFO_CLOSE or 840)
         StopSlotDrag()
         ns:SetEditMode(false)
+        -- the two windows belong together: if we opened the macro window, close it with the editor
+        if ns.openedMacroWindow then
+            ns.openedMacroWindow = false
+            local mf = _G.MacroFrame
+            if mf and mf:IsShown() then HideUIPanel(mf) end
+        end
     end)
     frame:Hide()
     RestorePosition()
@@ -524,7 +530,7 @@ function ns:CreateConfig()
         GameTooltip:SetText("How to use", 1, 1, 1)
         for _, line in ipairs(HELP_LINES) do GameTooltip:AddLine(line, nil, nil, nil, true) end
         GameTooltip:AddLine(" ")
-        GameTooltip:AddLine("/fmd new <name>, /fmd list, /fmd scan, /fmd minimap", 0.5, 0.8, 1, true)
+        GameTooltip:AddLine("/fmd new <name>, /fmd list, /fmd scan, /fmd minimap, /fmd settings", 0.5, 0.8, 1, true)
         GameTooltip:Show()
     end)
     help:SetScript("OnLeave", GameTooltip_Hide)
@@ -918,7 +924,7 @@ end
 
 function ns:ToggleConfig()
     self:CreateConfig()
-    frame:SetShown(not frame:IsShown())
+    if frame:IsShown() then frame:Hide() else self:OpenConfig() end
 end
 
 ---------------------------------------------------------------------------
@@ -978,6 +984,7 @@ local function HookMacroWindow()
         SyncSelectionFromMacroWindow()
     end)
     mf:HookScript("OnHide", function()
+        ns.openedMacroWindow = false
         if not frame or not frame:IsShown() or not frame.docked then return end
         if frame.openedByDock then
             frame:Hide()
@@ -1037,9 +1044,34 @@ function ns:SetDockToMacro(on)
     if frame and frame:IsShown() then self:ApplyDock() end
 end
 
+-- Blizzard_MacroUI is load-on-demand; load it so the macro window can be opened with the editor.
+local function LoadMacroWindow()
+    if not _G.MacroFrame then
+        if UIParentLoadAddOn then
+            pcall(UIParentLoadAddOn, "Blizzard_MacroUI")
+        else
+            local load = (C_AddOns and C_AddOns.LoadAddOn) or LoadAddOn
+            if load then pcall(load, "Blizzard_MacroUI") end
+        end
+    end
+    HookMacroWindow()
+    return _G.MacroFrame
+end
+
+-- Open the editor. By default it opens together with the macro window, docked to its right edge.
+-- In combat, or with docking turned off, it opens on its own.
 function ns:OpenConfig()
     self:CreateConfig()
-    frame:Show()
+    local mf = self.db.dockToMacro ~= false and not InCombatLockdown() and LoadMacroWindow()
+    if mf and not mf:IsShown() then
+        ShowUIPanel(mf) -- the macro window's OnShow hook shows the docked editor
+        if mf:IsShown() then self.openedMacroWindow = true end
+    end
+    if not frame:IsShown() then
+        frame.openedByDock = mf and mf:IsShown() or false
+        frame:Show()
+    end
+    self:ApplyDock()
     frame:Raise()
 end
 

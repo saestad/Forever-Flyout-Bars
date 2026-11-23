@@ -30,7 +30,7 @@ function ns:FillLauncherTooltip(tt, showDragHint)
     end
     tt:AddLine(" ")
     tt:AddLine("Left-click: open the bar editor", 0.5, 0.8, 1)
-    tt:AddLine("Right-click: options", 0.5, 0.8, 1)
+    tt:AddLine("Right-click: settings (Options > AddOns)", 0.5, 0.8, 1)
     if showDragHint then tt:AddLine("Drag: move this button", 0.5, 0.8, 1) end
 end
 
@@ -233,7 +233,7 @@ dockCheck:SetSize(26, 26)
 dockCheck:SetPoint("TOPLEFT", loginCheck, "BOTTOMLEFT", 0, -2)
 local dockLabel = panel:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
 dockLabel:SetPoint("LEFT", dockCheck, "RIGHT", 4, 0)
-dockLabel:SetText("Attach the bar editor to the macro window (/macro)")
+dockLabel:SetText("Open the bar editor together with the macro window (/macro), attached to it")
 dockCheck:SetScript("OnClick", function(self) ns:SetDockToMacro(self:GetChecked()) end)
 
 local barsHeader = panel:CreateFontString(nil, "ARTWORK", "GameFontNormal")
@@ -255,7 +255,9 @@ cmdText:SetPoint("TOPLEFT", cmdHeader, "BOTTOMLEFT", 0, -8)
 cmdText:SetJustifyH("LEFT")
 cmdText:SetSpacing(3)
 cmdText:SetText(table.concat({
-    "|cffffd100/fmd|r  open the bar editor",
+    "|cffffd100/fmd|r  open or close the bar editor (with the macro window)",
+    "|cffffd100/fmd options|r  open the bar editor",
+    "|cffffd100/fmd settings|r  open this page",
     "|cffffd100/fmd new <name>|r  create a bar",
     "|cffffd100/fmd list|r  list your bars",
     "|cffffd100/fmd scan|r  re-find which action buttons hold your macros",
@@ -310,7 +312,7 @@ end
 
 function ns:OpenOptions()
     if InCombatLockdown() then
-        self:Print("The options page can't be opened in combat.")
+        self:Print("The settings page can't be opened in combat.")
         return
     end
     if self.settingsCategory and Settings and Settings.OpenToCategory then

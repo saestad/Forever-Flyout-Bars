@@ -556,7 +556,7 @@ events:SetScript("OnEvent", function(self, event, arg1)
         ns:BuildAll()
         if ns.InitLauncher then ns:InitLauncher() end
         if ns.db.loginMessage ~= false then
-            print(("|cff33ccff%s|r%s - |cffffd100/fmd|r to edit bars, |cffffd100/fmd options|r for settings."):format(
+            print(("|cff33ccff%s|r%s - |cffffd100/fmd|r to edit bars, |cffffd100/fmd settings|r for settings."):format(
                 ns.TITLE, ns.VERSION ~= "" and (" v" .. ns.VERSION) or ""))
         end
     elseif event == "PLAYER_REGEN_DISABLED" then
@@ -588,10 +588,12 @@ SLASH_FOREVERMACRODROPDOWN2 = "/macrodropdown"
 SlashCmdList.FOREVERMACRODROPDOWN = function(msg)
     local cmd, rest = (msg or ""):match("^(%S*)%s*(.-)%s*$")
     cmd = cmd:lower()
-    if cmd == "" or cmd == "config" then
-        ns:ToggleConfig()
-    elseif cmd == "options" or cmd == "settings" then
-        ns:OpenOptions()
+    if cmd == "" then
+        ns:ToggleConfig() -- bar editor, opened together with the macro window
+    elseif cmd == "config" or cmd == "option" or cmd == "options" then
+        ns:OpenConfig()
+    elseif cmd == "settings" then
+        ns:OpenOptions() -- the page under Options > AddOns
     elseif cmd == "new" then
         local bar = ns:CreateBar(rest)
         if bar then
@@ -615,11 +617,12 @@ SlashCmdList.FOREVERMACRODROPDOWN = function(msg)
         ns:Print("Minimap button " .. (ns.db.minimap.hide and "hidden" or "shown") .. ".")
     else
         ns:Print("Commands:")
-        print("  /fmd - open the configuration window")
+        print("  /fmd - open or close the bar editor (opens with the macro window)")
+        print("  /fmd options - open the bar editor (same as /fmd, but only opens)")
         print("  /fmd new <name> - create a new popup bar")
         print("  /fmd list - list your bars")
         print("  /fmd scan - re-find which action buttons hold your macros")
         print("  /fmd minimap - show or hide the minimap button")
-        print("  /fmd options - open this addon's page in Options > AddOns")
+        print("  /fmd settings - open this addon's page in Options > AddOns")
     end
 end

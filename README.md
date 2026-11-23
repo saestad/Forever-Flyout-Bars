@@ -10,7 +10,7 @@ A World of Warcraft: Forever addon. It creates action-bar macros that open a pop
 - Opens up, down, left or right, in one or more columns/rows.
 - Shows cooldowns, item counts, and tints buttons when you lack power or can't use them, like the default bars.
 - Works with Blizzard bars, Bartender4 and ElvUI.
-- Edit bars in a window that docks onto the macro window (`/macro`). The popup stays open while you edit, so you see changes on the bar.
+- Edit bars in a window that opens attached to the macro window (`/macro`). The popup stays open while you edit, so you see changes on the bar.
 
 ## Install
 
@@ -30,11 +30,21 @@ The `.toc` targets WoW: Forever patch 1.60.1 (`## Interface: 16001`). After a ga
 
 ## Opening the addon
 
-- `/fmd` opens the bar editor.
-- **Minimap button**: left-click opens the bar editor, right-click opens the options page, drag to move it. If another addon has loaded LibDBIcon, the button is registered through it, so minimap button collectors and square minimaps work.
+The bar editor always opens together with Blizzard's macro window, attached to its right side:
+
+- `/fmd` opens the bar editor and the macro window, or closes them. `/fmd options` (or `/fmd option`, `/fmd config`) only opens them.
+- **Minimap button**: left-click does the same as `/fmd`, right-click opens the settings page, drag to move it. If another addon has loaded LibDBIcon, the button is registered through it, so minimap button collectors and square minimaps work.
 - **AddOns compartment** (the menu by the minimap): same clicks as the minimap button.
-- **Macro window** (`/macro`): the bar editor attaches to the right side of Blizzard's macro window and opens and closes with it. The addon icon in the macro window's title bar shows or hides it. Selecting one of the addon's macros in the macro window selects that bar in the editor. If the editor was already open before `/macro`, it stays open and goes back to its own position when the macro window closes. Turn this off in Options > AddOns.
-- **Options > AddOns > Forever Macro Dropdown**: an overview of your bars, a button that opens the editor, the minimap button, login message and macro window settings, the slash commands, and a copyable link to this GitHub page. `/fmd options` opens it (not in combat).
+- **`/macro`**: opening the macro window yourself also opens the editor next to it. The addon icon in the macro window's title bar shows or hides the editor.
+
+How the two windows go together:
+- Closing either one closes both, when they were opened together. If you opened `/macro` yourself, closing the editor leaves the macro window open.
+- If the editor was already open on its own before the macro window opened, it attaches while the macro window is open, then goes back to its own position.
+- Selecting one of the addon's macros in the macro window selects that bar in the editor.
+- In combat the macro window can't be used, so the editor opens on its own.
+- To always use the editor on its own, turn off "Open the bar editor together with the macro window" in the settings page.
+
+**Settings page** (Options > AddOns > Forever Macro Dropdown, or `/fmd settings`; not in combat): an overview of your bars, a button that opens the editor, the minimap button, login message and macro window settings, the slash commands, and a copyable link to this GitHub page.
 
 ## Use
 
@@ -84,12 +94,13 @@ Closing the popup:
 
 | Command | What it does |
 | --- | --- |
-| `/fmd` or `/fmd config` | Open or close the bar editor |
+| `/fmd` | Open or close the bar editor (with the macro window) |
+| `/fmd options` | Open the bar editor (with the macro window). `/fmd option` and `/fmd config` do the same |
+| `/fmd settings` | Open the settings page in Options > AddOns |
 | `/fmd new <name>` | Create a bar (and its macro) |
 | `/fmd list` | List your bars with entry count, direction, layout and whether the macro is on an action bar |
 | `/fmd scan` | Re-find which action buttons hold your macros (if a popup opens in the wrong place) |
 | `/fmd minimap` | Show or hide the minimap button |
-| `/fmd options` | Open the page in Options > AddOns |
 | `/fmd help` | List these commands in chat |
 
 On login a single chat line shows the version and the two main commands. Turn it off in Options > AddOns.
@@ -109,7 +120,8 @@ On login a single chat line shows the version and the two main commands. Turn it
 - **The bar list shows a red icon.** That character doesn't have the macro yet (for example a character-only bar on a new character). Drag the macro icon onto an action bar to create it.
 - **"A macro named X exists but wasn't made by this addon."** You have your own macro with that name. Rename the bar or your macro.
 - **I edited the macro text and my changes disappeared.** The addon manages the macro text and rewrites it. Put custom macros in the popup as macro entries instead.
-- **Show Popup, or right-clicking the minimap button, does nothing.** Check you're not in combat: the editor's buttons are disabled then, and the options page can't open.
+- **Show Popup, or right-clicking the minimap button, does nothing.** Check you're not in combat: the editor's buttons are disabled then, and the settings page can't open.
+- **The macro window didn't open with the editor.** You're in combat, or "Open the bar editor together with the macro window" is turned off in `/fmd settings`.
 
 ## Saved settings
 
@@ -122,7 +134,7 @@ Bars and settings are saved account-wide in `WTF\Account\<account>\SavedVariable
 - Bars can't be edited during combat (a Blizzard restriction). The editor shows "In combat - editing paused" and greys out. Changes made by events during combat are applied when combat ends.
 - The addon manages the macro text. Manual edits to the macro body are overwritten. The macro is `#showtooltip <first entry>` (for spells and items, which gives the icon and cooldown) followed by the `/click` line.
 - While the editor is open, each popup has an `fmd-editing` attribute set. The secure toggle then skips registering auto-hide, and auto-hide on an already open popup is cancelled with `SecureHandlerExecute`. It is re-armed when the editor closes.
-- The editor docks to `MacroFrame` by hooking its `OnShow`/`OnHide` once `Blizzard_MacroUI` loads. It doesn't change the macro window itself, apart from adding a small button to its title bar.
+- Opening the editor loads `Blizzard_MacroUI` if needed and shows `MacroFrame` with `ShowUIPanel`. The editor attaches by hooking `MacroFrame`'s `OnShow`/`OnHide`. It doesn't change the macro window itself, apart from adding a small button to its title bar.
 
 ## Files
 
