@@ -210,7 +210,7 @@ end)
 
 local openHint = panel:CreateFontString(nil, "ARTWORK", "GameFontDisableSmall")
 openHint:SetPoint("LEFT", openBtn, "RIGHT", 10, 0)
-openHint:SetText("or type /fmd")
+openHint:SetText("or type /ffm")
 
 local minimapCheck = CreateFrame("CheckButton", nil, panel, "UICheckButtonTemplate")
 minimapCheck:SetSize(26, 26)
@@ -255,13 +255,13 @@ cmdText:SetPoint("TOPLEFT", cmdHeader, "BOTTOMLEFT", 0, -8)
 cmdText:SetJustifyH("LEFT")
 cmdText:SetSpacing(3)
 cmdText:SetText(table.concat({
-    "|cffffd100/fmd|r  open or close the bar editor (with the macro window)",
-    "|cffffd100/fmd options|r  open the bar editor",
-    "|cffffd100/fmd settings|r  open this page",
-    "|cffffd100/fmd new <name>|r  create a bar",
-    "|cffffd100/fmd list|r  list your bars",
-    "|cffffd100/fmd scan|r  re-find which action buttons hold your macros",
-    "|cffffd100/fmd minimap|r  show or hide the minimap button",
+    "|cffffd100/ffm|r  open or close the bar editor (with the macro window)",
+    "|cffffd100/ffm options|r  open the bar editor",
+    "|cffffd100/ffm settings|r  open this page",
+    "|cffffd100/ffm new <name>|r  create a bar",
+    "|cffffd100/ffm list|r  list your bars",
+    "|cffffd100/ffm scan|r  re-find which action buttons hold your macros",
+    "|cffffd100/ffm minimap|r  show or hide the minimap button",
 }, "\n"))
 
 local aboutHeader = panel:CreateFontString(nil, "ARTWORK", "GameFontNormal")

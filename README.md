@@ -1,8 +1,8 @@
-<img src="Media/Icon.png" width="64" align="left" alt="Forever Macro Dropdown icon">
+<img src="Media/Icon.png" width="64" align="left" alt="Forever Flyout Macros icon">
 
-# Forever Macro Dropdown
+# Forever Flyout Macros
 
-A World of Warcraft: Forever addon. It creates action-bar macros that open a popup bar of spells, items, toys, mounts and macros. Works in combat.
+Custom flyouts for World of Warcraft: Forever. Each flyout is a macro you put on an action bar: click it, and a popup bar of spells, items, toys, mounts and macros flies out, like Blizzard's mage portal flyout. Works in combat.
 
 <br clear="left">
 
@@ -16,7 +16,7 @@ A World of Warcraft: Forever addon. It creates action-bar macros that open a pop
 
 1. Download the latest version from [GitHub](https://github.com/saestad/ForeverMacroDropdown): **Code > Download ZIP**, or a release if there is one.
 2. Unzip it into `World of Warcraft\_forever_\Interface\AddOns\`.
-3. **Rename the folder to `ForeverMacroDropdown`.** GitHub ZIPs unpack as `ForeverMacroDropdown-main`, and WoW only loads the addon when the folder name matches `ForeverMacroDropdown.toc`.
+3. **Rename the folder to `ForeverMacroDropdown`.** GitHub ZIPs unpack as `ForeverMacroDropdown-main`, and WoW only loads the addon when the folder name matches `ForeverMacroDropdown.toc`. (The folder keeps the addon's original name, Forever Macro Dropdown, so existing settings carry over.)
 4. Restart the game or type `/reload`.
 
 Or clone it straight into the AddOns folder:
@@ -32,8 +32,8 @@ The `.toc` targets WoW: Forever patch 1.60.1 (`## Interface: 16001`). After a ga
 
 The bar editor always opens together with Blizzard's macro window, attached to its right side:
 
-- `/fmd` opens the bar editor and the macro window, or closes them. `/fmd options` (or `/fmd option`, `/fmd config`) only opens them.
-- **Minimap button**: left-click does the same as `/fmd`, right-click opens the settings page, drag to move it. If another addon has loaded LibDBIcon, the button is registered through it, so minimap button collectors and square minimaps work.
+- `/ffm` opens the bar editor and the macro window, or closes them. `/ffm options` (or `/ffm option`, `/ffm config`) only opens them.
+- **Minimap button**: left-click does the same as `/ffm`, right-click opens the settings page, drag to move it. If another addon has loaded LibDBIcon, the button is registered through it, so minimap button collectors and square minimaps work.
 - **AddOns compartment** (the menu by the minimap): same clicks as the minimap button.
 - **`/macro`**: opening the macro window yourself also opens the editor next to it. The addon icon in the macro window's title bar shows or hides the editor.
 
@@ -44,7 +44,7 @@ How the two windows go together:
 - In combat the macro window can't be used, so the editor opens on its own.
 - To always use the editor on its own, turn off "Open the bar editor together with the macro window" in the settings page.
 
-**Settings page** (Options > AddOns > Forever Macro Dropdown, or `/fmd settings`; not in combat): an overview of your bars, a button that opens the editor, the minimap button, login message and macro window settings, the slash commands, and a copyable link to this GitHub page.
+**Settings page** (Options > AddOns > Forever Flyout Macros, or `/ffm settings`; not in combat): an overview of your bars, a button that opens the editor, the minimap button, login message and macro window settings, the slash commands, and a copyable link to this GitHub page.
 
 ## Use
 
@@ -90,18 +90,18 @@ Closing the popup:
 
 ## Slash commands
 
-`/macrodropdown` works everywhere `/fmd` does.
+`/fmd` (the command from before the rename) and `/macrodropdown` work everywhere `/ffm` does.
 
 | Command | What it does |
 | --- | --- |
-| `/fmd` | Open or close the bar editor (with the macro window) |
-| `/fmd options` | Open the bar editor (with the macro window). `/fmd option` and `/fmd config` do the same |
-| `/fmd settings` | Open the settings page in Options > AddOns |
-| `/fmd new <name>` | Create a bar (and its macro) |
-| `/fmd list` | List your bars with entry count, direction, layout and whether the macro is on an action bar |
-| `/fmd scan` | Re-find which action buttons hold your macros (if a popup opens in the wrong place) |
-| `/fmd minimap` | Show or hide the minimap button |
-| `/fmd help` | List these commands in chat |
+| `/ffm` | Open or close the bar editor (with the macro window) |
+| `/ffm options` | Open the bar editor (with the macro window). `/ffm option` and `/ffm config` do the same |
+| `/ffm settings` | Open the settings page in Options > AddOns |
+| `/ffm new <name>` | Create a bar (and its macro) |
+| `/ffm list` | List your bars with entry count, direction, layout and whether the macro is on an action bar |
+| `/ffm scan` | Re-find which action buttons hold your macros (if a popup opens in the wrong place) |
+| `/ffm minimap` | Show or hide the minimap button |
+| `/ffm help` | List these commands in chat |
 
 On login a single chat line shows the version and the two main commands. Turn it off in Options > AddOns.
 
@@ -116,12 +116,12 @@ On login a single chat line shows the version and the two main commands. Turn it
 ## Troubleshooting
 
 - **The addon isn't in the AddOns list, or is marked out of date.** Check the folder is named exactly `ForeverMacroDropdown`. After a game patch, update the `## Interface:` number (see Install).
-- **The popup opens in the middle of the screen.** The macro isn't on a visible action button, or the addon hasn't noticed yet. Put the macro on a bar and run `/fmd scan`.
+- **The popup opens in the middle of the screen.** The macro isn't on a visible action button, or the addon hasn't noticed yet. Put the macro on a bar and run `/ffm scan`.
 - **The bar list shows a red icon.** That character doesn't have the macro yet (for example a character-only bar on a new character). Drag the macro icon onto an action bar to create it.
 - **"A macro named X exists but wasn't made by this addon."** You have your own macro with that name. Rename the bar or your macro.
 - **I edited the macro text and my changes disappeared.** The addon manages the macro text and rewrites it. Put custom macros in the popup as macro entries instead.
 - **Show Popup, or right-clicking the minimap button, does nothing.** Check you're not in combat: the editor's buttons are disabled then, and the settings page can't open.
-- **The macro window didn't open with the editor.** You're in combat, or "Open the bar editor together with the macro window" is turned off in `/fmd settings`.
+- **The macro window didn't open with the editor.** You're in combat, or "Open the bar editor together with the macro window" is turned off in `/ffm settings`.
 
 ## Saved settings
 

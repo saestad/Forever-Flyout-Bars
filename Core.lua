@@ -6,7 +6,7 @@ _G.ForeverMacroDropdown = ns
 
 ns.QUESTION_ICON = 134400 -- INV_Misc_QuestionMark
 ns.ADDON_ICON = "Interface\\AddOns\\" .. ADDON .. "\\Media\\Icon"
-ns.TITLE = "Forever Macro Dropdown"
+ns.TITLE = "Forever Flyout Macros"
 local GetMetadata = (C_AddOns and C_AddOns.GetAddOnMetadata) or GetAddOnMetadata or function() end
 ns.VERSION = GetMetadata(ADDON, "Version") or ""
 ns.AUTHOR = GetMetadata(ADDON, "Author") or "saestad"
@@ -86,7 +86,7 @@ ns.GetSpellName = GetSpellName
 ---------------------------------------------------------------------------
 
 function ns:Print(...)
-    print("|cff33ccffForeverMacroDropdown:|r", ...)
+    print("|cff33ccff" .. ns.TITLE .. ":|r", ...)
 end
 
 -- User-facing feedback. Shown inline in the config window when it is open, otherwise printed to chat.
@@ -556,7 +556,7 @@ events:SetScript("OnEvent", function(self, event, arg1)
         ns:BuildAll()
         if ns.InitLauncher then ns:InitLauncher() end
         if ns.db.loginMessage ~= false then
-            print(("|cff33ccff%s|r%s - |cffffd100/fmd|r to edit bars, |cffffd100/fmd settings|r for settings."):format(
+            print(("|cff33ccff%s|r%s - |cffffd100/ffm|r to edit bars, |cffffd100/ffm settings|r for settings."):format(
                 ns.TITLE, ns.VERSION ~= "" and (" v" .. ns.VERSION) or ""))
         end
     elseif event == "PLAYER_REGEN_DISABLED" then
@@ -583,7 +583,8 @@ end)
 -- Slash commands
 ---------------------------------------------------------------------------
 
-SLASH_FOREVERMACRODROPDOWN1 = "/fmd"
+SLASH_FOREVERMACRODROPDOWN1 = "/ffm"
+SLASH_FOREVERMACRODROPDOWN3 = "/fmd" -- the command from before the rename
 SLASH_FOREVERMACRODROPDOWN2 = "/macrodropdown"
 SlashCmdList.FOREVERMACRODROPDOWN = function(msg)
     local cmd, rest = (msg or ""):match("^(%S*)%s*(.-)%s*$")
@@ -598,7 +599,7 @@ SlashCmdList.FOREVERMACRODROPDOWN = function(msg)
         local bar = ns:CreateBar(rest)
         if bar then
             ns.selectedBarId = bar.id
-            ns:Print("Created bar \"" .. bar.name .. "\". Open /fmd to add spells and items.")
+            ns:Print("Created bar \"" .. bar.name .. "\". Open /ffm to add spells and items.")
         end
     elseif cmd == "list" then
         if #ns.db.bars == 0 then ns:Print("No bars yet.") end
@@ -617,12 +618,12 @@ SlashCmdList.FOREVERMACRODROPDOWN = function(msg)
         ns:Print("Minimap button " .. (ns.db.minimap.hide and "hidden" or "shown") .. ".")
     else
         ns:Print("Commands:")
-        print("  /fmd - open or close the bar editor (opens with the macro window)")
-        print("  /fmd options - open the bar editor (same as /fmd, but only opens)")
-        print("  /fmd new <name> - create a new popup bar")
-        print("  /fmd list - list your bars")
-        print("  /fmd scan - re-find which action buttons hold your macros")
-        print("  /fmd minimap - show or hide the minimap button")
-        print("  /fmd settings - open this addon's page in Options > AddOns")
+        print("  /ffm - open or close the bar editor (opens with the macro window)")
+        print("  /ffm options - open the bar editor (same as /ffm, but only opens)")
+        print("  /ffm new <name> - create a new popup bar")
+        print("  /ffm list - list your bars")
+        print("  /ffm scan - re-find which action buttons hold your macros")
+        print("  /ffm minimap - show or hide the minimap button")
+        print("  /ffm settings - open this addon's page in Options > AddOns")
     end
 end

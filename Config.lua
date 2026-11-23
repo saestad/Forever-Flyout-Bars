@@ -1,4 +1,4 @@
--- ForeverMacroDropdown - Config window (/fmd)
+-- ForeverMacroDropdown - Config window (/ffm)
 
 local ADDON, ns = ...
 
@@ -530,7 +530,7 @@ function ns:CreateConfig()
         GameTooltip:SetText("How to use", 1, 1, 1)
         for _, line in ipairs(HELP_LINES) do GameTooltip:AddLine(line, nil, nil, nil, true) end
         GameTooltip:AddLine(" ")
-        GameTooltip:AddLine("/fmd new <name>, /fmd list, /fmd scan, /fmd minimap, /fmd settings", 0.5, 0.8, 1, true)
+        GameTooltip:AddLine("/ffm new <name>, /ffm list, /ffm scan, /ffm minimap, /ffm settings", 0.5, 0.8, 1, true)
         GameTooltip:Show()
     end)
     help:SetScript("OnLeave", GameTooltip_Hide)
