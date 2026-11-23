@@ -2,27 +2,25 @@
 
 # Flyout Bars
 
-**Build your own flyouts.** Put one button on your action bar, click it, and a bar of spells, items, toys, mounts and macros pops out next to it, like the mage portal flyout. Click a button in it to use it. Works in combat.
+**Build your own flyouts.** Put one button on your action bar, click it, and a bar of spells, items, toys, mounts and macros pops out next to it, like the mage portal flyout. Works in combat.
 
 <br clear="left">
 
-Use it to free up action bar slots: all your mounts, portals, hearthstones, food, buffs or profession tools behind one button each.
-
-**Looking for a macro dropdown, spell flyout or action bar popup menu?** That's what this does. Make a mount flyout, a portal or teleport menu, a toy and hearthstone menu, a food and buff bar, or a menu of profession tools, each opening from a single action button. Formerly known as **Forever Macro Dropdown**.
+Use it as a macro dropdown, spell flyout or action bar popup menu: a mount flyout, a portal or teleport menu, a toy and hearthstone menu, a food and buff bar, or your profession tools, each behind one button. Frees up action bar slots. Formerly known as **Forever Macro Dropdown**.
 
 ## Why another flyout addon?
 
-I've tried several addons like this one, but none felt polished or easy enough to use, so I spun up my own version with ease of use in mind. A few guildmates liked it, so I put it up on CurseForge too.
+I've tried several addons like this one, but none felt polished, configurable or easy enough to use, so I spun up my own version with ease of use in mind. A few guildmates liked it, so I put it up on CurseForge too.
 
 ## Features
 
 - **Up to 24 buttons per flyout**, with as many flyouts as you have macro slots
 - **Opens up, down, left or right**, as a single line or a grid with as many columns/rows as you want
 - **Anything you can drag**: spells, items, toys, mounts and your own macros
-- **Shows cooldowns and item counts**, and tints buttons when you lack mana or can't use them, just like Blizzard's action bars
+- **Shows cooldowns and item counts**, and tints buttons when you lack mana or can't use them, like the default bars
 - **Works in combat**: opening the flyout and casting from it are fully supported
 - **Sits next to the action button you clicked** and matches its size, on Blizzard bars, Bartender4 and ElvUI
-- **Closes the way you'd expect**: click the button again, press Escape, or click somewhere else. Auto-hide and close-after-use are on by default and can be turned off per flyout.
+- **Closes the way you'd expect**: click the button again, press Escape, or click anywhere else. Optional auto-hide and close-after-use.
 - **Account-wide or per character**: each flyout can be a general or character-specific macro
 
 ## Easy to set up
