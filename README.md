@@ -165,3 +165,7 @@ See [CHANGELOG.md](CHANGELOG.md).
 ## Author
 
 Made by [saestad](https://github.com/saestad).
+
+## License
+
+MIT. See [LICENSE](LICENSE).

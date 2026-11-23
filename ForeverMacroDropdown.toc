@@ -4,6 +4,7 @@
 ## Version: 2.0.0
 ## Author: saestad
 ## X-Website: https://github.com/saestad/Forever-Flyout-Bars
+## X-License: MIT
 ## Category: Action Bars
 ## SavedVariables: ForeverMacroDropdownDB
 ## IconTexture: Interface\AddOns\ForeverMacroDropdown\Media\Icon
