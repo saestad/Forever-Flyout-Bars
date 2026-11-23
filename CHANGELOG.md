@@ -1,13 +1,13 @@
 # Changelog
 
-## 1.1.0
+## 2.0.0
 
-Renamed from Forever Macro Dropdown to **Forever Flyout Macros**. The command is now `/ffm`, replacing `/fmd` and `/macrodropdown`. The folder name, saved settings and existing macros are unchanged.
+Renamed from Forever Macro Dropdown to **Flyout Bars**. The command is now `/fbar` (or `/flyoutbars`), replacing `/fmd`, `/ffm` and `/macrodropdown`. The folder name, saved settings and existing macros are unchanged.
 
 New:
 - Addon icon, minimap button (uses LibDBIcon when available), and an entry in the AddOns compartment menu.
-- Settings page under Options > AddOns: bar overview, minimap button, login message and macro window settings, slash commands, GitHub link. `/ffm settings` opens it.
-- The bar editor always opens together with Blizzard's macro window (`/macro`), attached to its right side, and they close together. `/ffm`, `/ffm options`, the minimap button and the compartment all open both. Selecting one of the addon's macros there selects that bar. Can be turned off in the settings page.
+- Settings page under Options > AddOns: bar overview, minimap button, login message and macro window settings, slash commands, GitHub link. `/fbar settings` opens it.
+- The bar editor always opens together with Blizzard's macro window (`/macro`), attached to its right side, and they close together. `/fbar`, `/fbar options`, the minimap button and the compartment all open both. Selecting one of the addon's macros there selects that bar. Can be turned off in the settings page.
 - Popups stay open while the editor is open (no auto-hide, UI clicks don't close them), so they can be adjusted on the action bar.
 - Columns/rows setting: popups can be a grid instead of a single line.
 - Spacing and Background settings in the editor.
@@ -17,7 +17,7 @@ New:
 - Popup buttons are tinted when you lack power or can't use them.
 - Feedback (added, removed, errors) shows in the editor instead of only in chat.
 - Login message with version and commands (can be turned off).
-- `/ffm minimap`, `/ffm options` (opens the editor), `/ffm settings` (opens the settings page).
+- `/fbar minimap`, `/fbar options` (opens the editor), `/fbar settings` (opens the settings page).
 
 Changed:
 - Redesigned editor window: draggable macro icon, welcome screen, help tooltip, combat indicator, remembers its position.
@@ -28,6 +28,8 @@ Fixed:
 - Dropping something on a grid slot could show "already on the bar" twice.
 - The Show Popup button could open and immediately close the popup.
 - The hint text under Contents overlapped the grid.
+- The macro window's icon picker (Change Name/Icon) opened behind the editor. The editor now steps aside while it is open.
+- Blizzard windows such as the spellbook and professions opened over or under the editor, so spells couldn't be dragged into it. The editor now uses the same layer as Blizzard's windows and moves to the right of whatever windows are open, including side tabs that stick out of them (professions). A docked editor can also be dragged elsewhere.
 
 ## 1.0.0
 

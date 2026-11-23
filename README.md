@@ -1,6 +1,6 @@
-<img src="Media/Icon.png" width="64" align="left" alt="Forever Flyout Macros icon">
+<img src="Media/Icon.png" width="64" align="left" alt="Flyout Bars icon">
 
-# Forever Flyout Macros
+# Flyout Bars
 
 Custom flyouts for World of Warcraft: Forever. Each flyout is a macro you put on an action bar: click it, and a popup bar of spells, items, toys, mounts and macros flies out, like Blizzard's mage portal flyout. Works in combat.
 
@@ -32,8 +32,8 @@ The `.toc` targets WoW: Forever patch 1.60.1 (`## Interface: 16001`). After a ga
 
 The bar editor always opens together with Blizzard's macro window, attached to its right side:
 
-- `/ffm` opens the bar editor and the macro window, or closes them. `/ffm options` (or `/ffm option`, `/ffm config`) only opens them.
-- **Minimap button**: left-click does the same as `/ffm`, right-click opens the settings page, drag to move it. If another addon has loaded LibDBIcon, the button is registered through it, so minimap button collectors and square minimaps work.
+- `/fbar` opens the bar editor and the macro window, or closes them. `/fbar options` (or `/fbar option`, `/fbar config`) only opens them.
+- **Minimap button**: left-click does the same as `/fbar`, right-click opens the settings page, drag to move it. If another addon has loaded LibDBIcon, the button is registered through it, so minimap button collectors and square minimaps work.
 - **AddOns compartment** (the menu by the minimap): same clicks as the minimap button.
 - **`/macro`**: opening the macro window yourself also opens the editor next to it. The addon icon in the macro window's title bar shows or hides the editor.
 
@@ -41,10 +41,13 @@ How the two windows go together:
 - Closing either one closes both, when they were opened together. If you opened `/macro` yourself, closing the editor leaves the macro window open.
 - If the editor was already open on its own before the macro window opened, it attaches while the macro window is open, then goes back to its own position.
 - Selecting one of the addon's macros in the macro window selects that bar in the editor.
+- **Change Name/Icon** in the macro window opens Blizzard's icon picker where the editor sits, so the editor steps aside while the picker is open and comes back when it closes.
+- Other Blizzard windows (spellbook, professions, character, ...) open side by side with the macro window, and the editor moves to the right of the right-most one, clear of side tabs such as the professions window's. Nothing covers it, so you can drag spells and items straight into the grid.
+- If your screen is too narrow for everything side by side, drag the editor by its title bar to put it somewhere else. It stays there until you close it, and attaches again the next time it opens.
 - In combat the macro window can't be used, so the editor opens on its own.
 - To always use the editor on its own, turn off "Open the bar editor together with the macro window" in the settings page.
 
-**Settings page** (Options > AddOns > Forever Flyout Macros, or `/ffm settings`; not in combat): an overview of your bars, a button that opens the editor, the minimap button, login message and macro window settings, the slash commands, and a copyable link to this GitHub page.
+**Settings page** (Options > AddOns > Flyout Bars, or `/fbar settings`; not in combat): an overview of your bars, a button that opens the editor, the minimap button, login message and macro window settings, the slash commands, and a copyable link to this GitHub page.
 
 ## Use
 
@@ -90,16 +93,18 @@ Closing the popup:
 
 ## Slash commands
 
+`/flyoutbars` works everywhere `/fbar` does.
+
 | Command | What it does |
 | --- | --- |
-| `/ffm` | Open or close the bar editor (with the macro window) |
-| `/ffm options` | Open the bar editor (with the macro window). `/ffm option` and `/ffm config` do the same |
-| `/ffm settings` | Open the settings page in Options > AddOns |
-| `/ffm new <name>` | Create a bar (and its macro) |
-| `/ffm list` | List your bars with entry count, direction, layout and whether the macro is on an action bar |
-| `/ffm scan` | Re-find which action buttons hold your macros (if a popup opens in the wrong place) |
-| `/ffm minimap` | Show or hide the minimap button |
-| `/ffm help` | List these commands in chat |
+| `/fbar` | Open or close the bar editor (with the macro window) |
+| `/fbar options` | Open the bar editor (with the macro window). `/fbar option` and `/fbar config` do the same |
+| `/fbar settings` | Open the settings page in Options > AddOns |
+| `/fbar new <name>` | Create a bar (and its macro) |
+| `/fbar list` | List your bars with entry count, direction, layout and whether the macro is on an action bar |
+| `/fbar scan` | Re-find which action buttons hold your macros (if a popup opens in the wrong place) |
+| `/fbar minimap` | Show or hide the minimap button |
+| `/fbar help` | List these commands in chat |
 
 On login a single chat line shows the version and the two main commands. Turn it off in Options > AddOns.
 
@@ -114,12 +119,12 @@ On login a single chat line shows the version and the two main commands. Turn it
 ## Troubleshooting
 
 - **The addon isn't in the AddOns list, or is marked out of date.** Check the folder is named exactly `ForeverMacroDropdown`. After a game patch, update the `## Interface:` number (see Install).
-- **The popup opens in the middle of the screen.** The macro isn't on a visible action button, or the addon hasn't noticed yet. Put the macro on a bar and run `/ffm scan`.
+- **The popup opens in the middle of the screen.** The macro isn't on a visible action button, or the addon hasn't noticed yet. Put the macro on a bar and run `/fbar scan`.
 - **The bar list shows a red icon.** That character doesn't have the macro yet (for example a character-only bar on a new character). Drag the macro icon onto an action bar to create it.
 - **"A macro named X exists but wasn't made by this addon."** You have your own macro with that name. Rename the bar or your macro.
 - **I edited the macro text and my changes disappeared.** The addon manages the macro text and rewrites it. Put custom macros in the popup as macro entries instead.
 - **Show Popup, or right-clicking the minimap button, does nothing.** Check you're not in combat: the editor's buttons are disabled then, and the settings page can't open.
-- **The macro window didn't open with the editor.** You're in combat, or "Open the bar editor together with the macro window" is turned off in `/ffm settings`.
+- **The macro window didn't open with the editor.** You're in combat, or "Open the bar editor together with the macro window" is turned off in `/fbar settings`.
 
 ## Saved settings
 
@@ -132,7 +137,7 @@ Bars and settings are saved account-wide in `WTF\Account\<account>\SavedVariable
 - Bars can't be edited during combat (a Blizzard restriction). The editor shows "In combat - editing paused" and greys out. Changes made by events during combat are applied when combat ends.
 - The addon manages the macro text. Manual edits to the macro body are overwritten. The macro is `#showtooltip <first entry>` (for spells and items, which gives the icon and cooldown) followed by the `/click` line.
 - While the editor is open, each popup has an `fmd-editing` attribute set. The secure toggle then skips registering auto-hide, and auto-hide on an already open popup is cancelled with `SecureHandlerExecute`. It is re-armed when the editor closes.
-- Opening the editor loads `Blizzard_MacroUI` if needed and shows `MacroFrame` with `ShowUIPanel`. The editor attaches by hooking `MacroFrame`'s `OnShow`/`OnHide`. It doesn't change the macro window itself, apart from adding a small button to its title bar.
+- Opening the editor loads `Blizzard_MacroUI` if needed and shows `MacroFrame` with `ShowUIPanel`. The editor attaches by hooking `MacroFrame`'s `OnShow`/`OnHide`. It is not itself a managed UI panel (that taints the panel layout code); instead it post-hooks `ShowUIPanel`, `HideUIPanel` and `UpdateUIPanelPositions` and anchors to the right-most window from `GetUIPanel("left"/"center"/"right"/"doublewide")`. It doesn't change the macro window itself, apart from adding a small button to its title bar.
 
 ## Files
 

@@ -1,4 +1,4 @@
--- ForeverMacroDropdown - Config window (/ffm)
+-- ForeverMacroDropdown - Config window (/fbar)
 
 local ADDON, ns = ...
 
@@ -468,28 +468,39 @@ function ns:CreateConfig()
 
     frame = CreateFrame("Frame", "ForeverMacroDropdownConfig", UIParent, "BasicFrameTemplateWithInset")
     frame:SetSize(WIDTH, HEIGHT)
-    frame:SetFrameStrata("HIGH")
+    -- Same layer as Blizzard's windows (spellbook, macro window, ...), so they don't open behind it.
+    -- Toplevel: whichever of them was clicked last comes to the front.
+    frame:SetFrameStrata("MEDIUM")
     frame:SetToplevel(true)
     frame:SetClampedToScreen(true)
     frame:SetMovable(true)
     frame:EnableMouse(true)
     frame:RegisterForDrag("LeftButton")
     frame:SetScript("OnDragStart", function(self)
-        if not self.docked then self:StartMoving() end
+        -- Dragging a docked editor detaches it until it closes (for screens too narrow to fit everything).
+        if self.docked then
+            self.userMoved = true
+            self.docked = false
+        end
+        self:StartMoving()
     end)
     frame:SetScript("OnDragStop", function(self)
         self:StopMovingOrSizing()
-        if not self.docked then SavePosition() end
+        SavePosition()
     end)
     frame:SetScript("OnShow", function()
         PlaySound(SOUNDKIT and SOUNDKIT.IG_CHARACTER_INFO_OPEN or 839)
+        frame.hiddenForPicker = false -- reopened (e.g. /fbar) while the icon picker is up: it's a normal open again
         ns:ApplyDock()
         ns:SetEditMode(true) -- open popups stay open while editing
         ns:RefreshConfig()
     end)
-    frame:SetScript("OnHide", function()
-        PlaySound(SOUNDKIT and SOUNDKIT.IG_CHARACTER_INFO_CLOSE or 840)
+    frame:SetScript("OnHide", function(self)
         StopSlotDrag()
+        -- only stepping aside for the macro icon picker: keep editing mode and the macro window
+        if self.hiddenForPicker then return end
+        PlaySound(SOUNDKIT and SOUNDKIT.IG_CHARACTER_INFO_CLOSE or 840)
+        self.userMoved = false -- docks again next time
         ns:SetEditMode(false)
         -- the two windows belong together: if we opened the macro window, close it with the editor
         if ns.openedMacroWindow then
@@ -530,7 +541,7 @@ function ns:CreateConfig()
         GameTooltip:SetText("How to use", 1, 1, 1)
         for _, line in ipairs(HELP_LINES) do GameTooltip:AddLine(line, nil, nil, nil, true) end
         GameTooltip:AddLine(" ")
-        GameTooltip:AddLine("/ffm new <name>, /ffm list, /ffm scan, /ffm minimap, /ffm settings", 0.5, 0.8, 1, true)
+        GameTooltip:AddLine("/fbar new <name>, /fbar list, /fbar scan, /fbar minimap, /fbar settings", 0.5, 0.8, 1, true)
         GameTooltip:Show()
     end)
     help:SetScript("OnLeave", GameTooltip_Hide)
@@ -937,18 +948,85 @@ local function MacroWindow()
     return mf and mf:IsShown() and mf or nil
 end
 
+-- Blizzard lays out its windows (spellbook, professions, character, macro window, ...) side by side
+-- in "left", "center" and "right" slots. The docked editor goes to the right of the right-most one,
+-- so none of them cover it and spells can be dragged across.
+local PANEL_AREAS = { "left", "center", "right", "doublewide" }
+local MAX_OVERHANG = 80 -- how far tabs etc. may stick out past a window's edge and still count
+
+-- A window's right edge in screen units, including parts that stick out past it, such as the
+-- side tabs on the professions window and spellbook. Only children that start at or inside the
+-- edge count, so unrelated frames parented to the window don't push the editor away.
+local function VisualRight(f)
+    local scale = f:GetEffectiveScale()
+    local right = (f:GetRight() or 0) * scale
+    local edge, limit = right, right + MAX_OVERHANG * scale
+    local function scan(parent, depth)
+        for _, c in ipairs({ parent:GetChildren() }) do
+            if c:IsVisible() then
+                local s = c:GetEffectiveScale()
+                local l, r = c:GetLeft(), c:GetRight()
+                if l and r and l * s <= right + 4 * scale and r * s > edge and r * s <= limit then
+                    edge = r * s
+                end
+                if depth < 3 then scan(c, depth + 1) end
+            end
+        end
+    end
+    pcall(scan, f, 1)
+    return edge, right
+end
+
+-- The right-most open window, and how far its visible right edge (tabs included) sticks out past its frame.
+local function RightmostWindow(mf)
+    local best = mf
+    local bestEdge, bestFrameRight = VisualRight(mf)
+    local function consider(f)
+        if type(f) ~= "table" or f == frame or not f.IsShown or not f:IsShown() then return end
+        local edge, frameRight = VisualRight(f)
+        if edge > bestEdge then best, bestEdge, bestFrameRight = f, edge, frameRight end
+    end
+    if GetUIPanel then
+        for _, area in ipairs(PANEL_AREAS) do
+            local ok, f = pcall(GetUIPanel, area)
+            if ok then consider(f) end
+        end
+    end
+    consider(_G.MacroPopupFrame) -- the macro icon picker ("Change Name/Icon") isn't a managed window
+    return best, bestEdge - bestFrameRight
+end
+
 -- Attach to the macro window if it is open (and docking is enabled), otherwise use the saved position.
 function ns:ApplyDock()
     if not frame then return end
     local mf = self.db.dockToMacro ~= false and MacroWindow()
-    frame.docked = mf and true or false
     frame:StopMovingOrSizing()
-    if mf then
+    if mf and frame.userMoved then
+        frame.docked = false -- dragged away by the user: stay put until closed
+    elseif mf then
+        frame.docked = true
+        local anchor, overhang = RightmostWindow(mf)
+        -- overhang is in screen units; SetPoint offsets are in the editor's own scale
         frame:ClearAllPoints()
-        frame:SetPoint("TOPLEFT", mf, "TOPRIGHT", 2, 0)
+        frame:SetPoint("TOPLEFT", anchor, "TOPRIGHT", 2 + overhang / frame:GetEffectiveScale(), 0)
     else
+        frame.docked = false
         RestorePosition()
     end
+end
+
+-- Follow Blizzard's window layout: re-dock whenever it opens, closes or rearranges a window.
+local relayoutQueued
+local function QueueRelayout()
+    if relayoutQueued then return end
+    relayoutQueued = true
+    C_Timer.After(0, function() -- next frame, once Blizzard has finished moving its windows
+        relayoutQueued = false
+        if frame and frame:IsShown() and frame.docked then ns:ApplyDock() end
+    end)
+end
+for _, fn in ipairs({ "ShowUIPanel", "HideUIPanel", "UpdateUIPanelPositions" }) do
+    if type(_G[fn]) == "function" then hooksecurefunc(fn, QueueRelayout) end
 end
 
 -- Select the bar whose macro is selected in the macro window.
@@ -985,10 +1063,10 @@ local function HookMacroWindow()
     end)
     mf:HookScript("OnHide", function()
         ns.openedMacroWindow = false
-        if not frame or not frame:IsShown() or not frame.docked then return end
+        if not frame or not frame:IsShown() then return end
         if frame.openedByDock then
-            frame:Hide()
-        else
+            frame:Hide() -- opened together, close together (also when dragged away)
+        elseif frame.docked then
             ns:ApplyDock() -- was open before /macro: go back to its own position
         end
     end)
@@ -997,6 +1075,29 @@ local function HookMacroWindow()
         hooksecurefunc(mf, "SelectMacro", SyncSelectionFromMacroWindow)
     elseif _G.MacroFrame_SelectMacro then
         hooksecurefunc("MacroFrame_SelectMacro", SyncSelectionFromMacroWindow)
+    end
+
+    -- "Change Name/Icon" opens an icon picker in the spot where the editor is docked, and below it.
+    -- Step aside while it's open, and come back when it closes.
+    local picker = _G.MacroPopupFrame
+    if picker then
+        picker:HookScript("OnShow", function()
+            if frame and frame:IsShown() and frame.docked then
+                frame.hiddenForPicker = true
+                frame:Hide()
+            end
+        end)
+        picker:HookScript("OnHide", function()
+            if not frame or not frame.hiddenForPicker then return end
+            frame.hiddenForPicker = false
+            if MacroWindow() then
+                frame:Show() -- docks to the macro window again
+            elseif not frame.openedByDock then
+                frame:Show() -- was open on its own before /macro: back to its own position
+            else
+                ns:SetEditMode(false) -- the macro window closed meanwhile; the editor stays closed
+            end
+        end)
     end
 
     -- addon icon in the macro window's title bar: show / hide the docked editor
