@@ -90,8 +90,6 @@ Closing the popup:
 
 ## Slash commands
 
-`/fmd` (the command from before the rename) and `/macrodropdown` work everywhere `/ffm` does.
-
 | Command | What it does |
 | --- | --- |
 | `/ffm` | Open or close the bar editor (with the macro window) |

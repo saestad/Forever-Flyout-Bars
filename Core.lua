@@ -584,8 +584,6 @@ end)
 ---------------------------------------------------------------------------
 
 SLASH_FOREVERMACRODROPDOWN1 = "/ffm"
-SLASH_FOREVERMACRODROPDOWN3 = "/fmd" -- the command from before the rename
-SLASH_FOREVERMACRODROPDOWN2 = "/macrodropdown"
 SlashCmdList.FOREVERMACRODROPDOWN = function(msg)
     local cmd, rest = (msg or ""):match("^(%S*)%s*(.-)%s*$")
     cmd = cmd:lower()

@@ -2,7 +2,7 @@
 
 ## 1.1.0
 
-Renamed from Forever Macro Dropdown to **Forever Flyout Macros**. The main command is now `/ffm`; `/fmd` and `/macrodropdown` still work. The folder name, saved settings and existing macros are unchanged.
+Renamed from Forever Macro Dropdown to **Forever Flyout Macros**. The command is now `/ffm`, replacing `/fmd` and `/macrodropdown`. The folder name, saved settings and existing macros are unchanged.
 
 New:
 - Addon icon, minimap button (uses LibDBIcon when available), and an entry in the AddOns compartment menu.
