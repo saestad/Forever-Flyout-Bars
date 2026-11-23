@@ -1,0 +1,5 @@
+package-as: ForeverMacroDropdown
+
+ignore:
+  - tools
+  - README.md
