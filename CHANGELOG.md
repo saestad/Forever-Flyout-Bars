@@ -18,6 +18,7 @@ New:
 - Feedback (added, removed, errors) shows in the editor instead of only in chat.
 - Login message with version and commands (can be turned off).
 - `/fbar minimap`, `/fbar options` (opens the editor), `/fbar settings` (opens the settings page).
+- Licensed under MIT (see LICENSE).
 
 Changed:
 - Redesigned editor window: draggable macro icon, welcome screen, help tooltip, combat indicator, remembers its position.

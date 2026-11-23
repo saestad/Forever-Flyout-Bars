@@ -14,7 +14,11 @@ Custom flyouts for World of Warcraft: Forever. Each flyout is a macro you put on
 
 ## Install
 
-1. Download the latest version from [GitHub](https://github.com/saestad/Forever-Flyout-Bars): **Code > Download ZIP**, or a release if there is one.
+**Easiest:** download `FlyoutBars-<version>.zip` from the [Releases page](https://github.com/saestad/Forever-Flyout-Bars/releases) and unzip it into `World of Warcraft\_forever_\Interface\AddOns\`. It already contains the right folder. Restart the game or type `/reload`.
+
+**From the source code** (the latest, possibly unreleased, version):
+
+1. On [GitHub](https://github.com/saestad/Forever-Flyout-Bars), choose **Code > Download ZIP**. (Not the "Source code" ZIPs on the Releases page: they have the same folder-name problem.)
 2. Unzip it into `World of Warcraft\_forever_\Interface\AddOns\`.
 3. **Rename the folder to `ForeverMacroDropdown`.** GitHub ZIPs unpack as `Forever-Flyout-Bars-main`, and WoW only loads the addon when the folder name matches `ForeverMacroDropdown.toc`. (The folder keeps the addon's original name, Forever Macro Dropdown, so existing settings carry over.)
 4. Restart the game or type `/reload`.
@@ -149,6 +153,24 @@ Bars and settings are saved account-wide in `WTF\Account\<account>\SavedVariable
 | `Launcher.lua` | Minimap button, AddOns compartment entry, Options > AddOns page |
 | `Media/Icon.tga` | Addon icon used in game (128×128, 32-bit TGA) |
 | `Media/Icon.png` | Same icon for GitHub |
+| `LICENSE` | MIT license |
+| `tools/build-release.ps1` | Builds the release ZIP (not shipped in the ZIP) |
+| `tools/make-icon.ps1` | Draws the icon as TGA and PNG at any size (not shipped in the ZIP) |
+| `dist/` | Build output: release ZIPs, the large icon (ignored by git) |
+
+## Making a release
+
+1. Set the new version in `ForeverMacroDropdown.toc` (`## Version:`) and add a section for it at the top of `CHANGELOG.md`. Use a major version (3.0.0) when something players rely on stops working, such as a removed command.
+2. Build the ZIP:
+   ```
+   powershell -ExecutionPolicy Bypass -File tools\build-release.ps1
+   ```
+   This writes `dist\FlyoutBars-<version>.zip` with a single `ForeverMacroDropdown/` folder inside. If you add a file the game needs, add it to the list at the top of the script too.
+3. Commit, push, and tag the commit: `git tag -a v<version> -m "Flyout Bars <version>"`, then `git push origin v<version>`.
+4. On GitHub, create a release from the tag, paste the changelog section, and attach the ZIP from `dist\`.
+5. On CurseForge, upload the same ZIP. Choose **Release** and the **WoW Forever** game version, and paste a short changelog.
+
+For a bigger project-page icon: `powershell -ExecutionPolicy Bypass -File tools\make-icon.ps1 -OutTga dist\big.tga -OutPng dist\FlyoutBars-icon-512.png -Size 512`.
 
 ## Bugs and ideas
 
