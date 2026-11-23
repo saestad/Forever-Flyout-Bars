@@ -10,7 +10,7 @@ ns.TITLE = "Flyout Bars"
 local GetMetadata = (C_AddOns and C_AddOns.GetAddOnMetadata) or GetAddOnMetadata or function() end
 ns.VERSION = GetMetadata(ADDON, "Version") or ""
 ns.AUTHOR = GetMetadata(ADDON, "Author") or "saestad"
-ns.WEBSITE = GetMetadata(ADDON, "X-Website") or "https://github.com/saestad/Forever-Flyout-Macros"
+ns.WEBSITE = GetMetadata(ADDON, "X-Website") or "https://github.com/saestad/Forever-Flyout-Bars"
 ns.MAX_ENTRIES = 24
 ns.MAX_NAME = 16 -- WoW macro name limit
 
