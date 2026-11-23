@@ -5,16 +5,25 @@ local ADDON, ns = ...
 _G.ForeverMacroDropdown = ns
 
 ns.QUESTION_ICON = 134400 -- INV_Misc_QuestionMark
+ns.ADDON_ICON = "Interface\\AddOns\\" .. ADDON .. "\\Media\\Icon"
+ns.TITLE = "Forever Macro Dropdown"
+local GetMetadata = (C_AddOns and C_AddOns.GetAddOnMetadata) or GetAddOnMetadata or function() end
+ns.VERSION = GetMetadata(ADDON, "Version") or ""
+ns.AUTHOR = GetMetadata(ADDON, "Author") or "saestad"
+ns.WEBSITE = GetMetadata(ADDON, "X-Website") or "https://github.com/saestad/ForeverMacroDropdown"
 ns.MAX_ENTRIES = 24
 ns.MAX_NAME = 16 -- WoW macro name limit
 
 local DEFAULTS = {
     direction = "UP", -- UP / DOWN = vertical, RIGHT / LEFT = horizontal
     spacing = 4,
+    lines = 1, -- columns (vertical popups) or rows (horizontal popups)
     closeOnUse = true,
     autoHide = 3, -- seconds the mouse may be away before the popup closes; 0 = never
     perCharacter = false, -- create the macro under the character's macros instead of the account-wide ones
+    showBackground = true, -- dark backdrop and border behind the popup's buttons
 }
+ns.DEFAULTS = DEFAULTS
 
 local MAX_ACTION_SLOTS = 180
 local GetActionInfo = GetActionInfo or (C_ActionBar and C_ActionBar.GetActionInfo)
@@ -80,9 +89,17 @@ function ns:Print(...)
     print("|cff33ccffForeverMacroDropdown:|r", ...)
 end
 
+-- User-facing feedback. Shown inline in the config window when it is open, otherwise printed to chat.
+-- level: "error" (default), "ok" or "info"
+function ns:Notify(msg, level)
+    if not msg then return end
+    if self.ShowConfigFeedback and self:ShowConfigFeedback(msg, level or "error") then return end
+    self:Print(msg)
+end
+
 function ns:CheckCombat()
     if InCombatLockdown() then
-        self:Print("Bars can't be changed in combat.")
+        self:Notify("Bars can't be changed in combat.")
         return false
     end
     return true
@@ -101,6 +118,8 @@ function ns:InitDB()
     ForeverMacroDropdownDB = db
     db.bars = db.bars or {}
     db.nextId = db.nextId or 1
+    db.minimap = db.minimap or {} -- LibDBIcon-compatible: { hide = bool, minimapPos = degrees }
+    if db.minimap.minimapPos == nil then db.minimap.minimapPos = 200 end
     for _, bar in ipairs(db.bars) do
         for k, v in pairs(DEFAULTS) do
             if bar[k] == nil then bar[k] = v end
@@ -182,6 +201,12 @@ function ns:EntryFromCursor()
             end
         end
         if spellID then return { type = "spell", id = spellID } end
+    elseif kind == "companion" then
+        -- older clients: "companion", index, "MOUNT" | "CRITTER"
+        if GetCompanionInfo and (b == "MOUNT" or b == "CRITTER") then
+            local spellID = select(3, GetCompanionInfo(b, a))
+            if spellID then return { type = "spell", id = spellID } end
+        end
     elseif kind == "macro" then
         local name = GetMacroInfo(a)
         if name then return { type = "macro", name = name } end
@@ -225,26 +250,42 @@ end
 function ns:AddEntry(bar, entry, pos)
     if not self:CheckCombat() then return end
     if #bar.entries >= self.MAX_ENTRIES then
-        self:Print("A bar can hold at most " .. self.MAX_ENTRIES .. " entries.")
+        self:Notify("A bar can hold at most " .. self.MAX_ENTRIES .. " entries.")
         return
     end
     for _, e in ipairs(bar.entries) do
         if SameEntry(e, entry) then
-            self:Print("That is already on the bar.")
+            self:Notify((self:EntryInfo(entry)) .. " is already on the bar.")
             return
         end
     end
     if not pos or pos > #bar.entries + 1 then pos = #bar.entries + 1 end
     tinsert(bar.entries, pos, entry)
     self:OnBarChanged(bar)
+    self:Notify("Added " .. (self:EntryInfo(entry)) .. ".", "ok")
+    return true
+end
+
+-- Move an entry to a new position (used by drag-to-reorder in the grid).
+function ns:MoveEntryTo(bar, from, to)
+    if not self:CheckCombat() then return end
+    local n = #bar.entries
+    if not bar.entries[from] then return end
+    to = math.max(1, math.min(n, to))
+    if to == from then return end
+    local e = tremove(bar.entries, from)
+    tinsert(bar.entries, to, e)
+    self:OnBarChanged(bar)
     return true
 end
 
 function ns:RemoveEntry(bar, index)
     if not self:CheckCombat() then return end
-    if bar.entries[index] then
+    local e = bar.entries[index]
+    if e then
         tremove(bar.entries, index)
         self:OnBarChanged(bar)
+        self:Notify("Removed " .. (self:EntryInfo(e)) .. ".", "info")
     end
 end
 
@@ -292,7 +333,7 @@ end
 function ns:CreateBar(name)
     if not self:CheckCombat() then return end
     local valid, err = self:ValidateName(name)
-    if not valid then self:Print(err) return end
+    if not valid then self:Notify(err) return end
 
     local bar = { id = self.db.nextId, name = valid, entries = {} }
     for k, v in pairs(DEFAULTS) do bar[k] = v end
@@ -305,10 +346,34 @@ function ns:CreateBar(name)
     return bar
 end
 
+-- Copy a bar (entries and settings) under a free name like "Name 2".
+function ns:DuplicateBar(src)
+    if not self:CheckCombat() then return end
+    local name
+    for n = 2, 99 do
+        local suffix = " " .. n
+        local candidate = strtrim(src.name:sub(1, self.MAX_NAME - #suffix)) .. suffix
+        if self:ValidateName(candidate) then name = candidate break end
+    end
+    if not name then self:Notify("Couldn't find a free name for the copy.") return end
+
+    local bar = { id = self.db.nextId, name = name, entries = {} }
+    self.db.nextId = self.db.nextId + 1
+    for k in pairs(DEFAULTS) do bar[k] = src[k] end
+    for i, e in ipairs(src.entries) do bar.entries[i] = { type = e.type, id = e.id, name = e.name } end
+    tinsert(self.db.bars, bar)
+
+    self:BuildBar(bar)
+    self:SyncMacro(bar, true)
+    self:Notify("Created \"" .. name .. "\" as a copy of \"" .. src.name .. "\".", "ok")
+    self:RefreshConfig()
+    return bar
+end
+
 function ns:RenameBar(bar, newName)
     if not self:CheckCombat() then return end
     local name, err = self:ValidateName(newName, bar)
-    if not name then self:Print(err) return end
+    if not name then self:Notify(err) return end
     if name == bar.name then return true end
 
     local idx = GetMacroIndexByName(bar.name)
@@ -316,9 +381,26 @@ function ns:RenameBar(bar, newName)
     if idx and idx > 0 and self:IsOurMacro(idx, bar) then
         EditMacro(idx, name, self:MacroIcon(bar), self:MacroBody(bar))
     end
+    self:Notify("Renamed to \"" .. name .. "\".", "ok")
     self:RequestScan()
     self:RefreshConfig()
     return true
+end
+
+-- Icon shown for a bar in lists: the first entry's icon.
+function ns:BarIcon(bar)
+    local first = bar.entries[1]
+    if first then return select(2, self:EntryInfo(first)) end
+    return self.QUESTION_ICON
+end
+
+-- "missing" (no macro on this character), "unplaced" (macro exists, not on a visible bar) or "placed".
+-- Second return: the macro index, if any.
+function ns:BarStatus(bar)
+    local idx = GetMacroIndexByName(bar.name)
+    if not idx or idx == 0 then return "missing" end
+    if self:IsBarOnActionBar(bar) then return "placed", idx end
+    return "unplaced", idx
 end
 
 function ns:DeleteBar(id)
@@ -371,7 +453,7 @@ function ns:SyncMacro(bar, create)
     local idx = GetMacroIndexByName(bar.name)
     if idx and idx > 0 then
         if not self:IsOurMacro(idx) then
-            self:Print("A macro named \"" .. bar.name .. "\" exists but wasn't made by this addon; leaving it alone.")
+            self:Notify("A macro named \"" .. bar.name .. "\" exists but wasn't made by this addon; leaving it alone.")
             return
         end
         local _, _, current = GetMacroInfo(idx)
@@ -382,7 +464,7 @@ function ns:SyncMacro(bar, create)
     elseif create then
         local ok, scope = HasRoomForMacro(bar.perCharacter)
         if not ok then
-            self:Print("Your " .. scope .. " macro slots are full. Delete a macro and try again.")
+            self:Notify("Your " .. scope .. " macro slots are full. Delete a macro and try again.")
             return
         end
         return CreateMacro(bar.name, self:MacroIcon(bar), body, bar.perCharacter and true or nil)
@@ -400,7 +482,7 @@ function ns:SetBarScope(bar, perCharacter)
     if idx and idx > 0 and self:IsOurMacro(idx, bar) and IsCharacterMacro(idx) ~= perCharacter then
         local ok, scope = HasRoomForMacro(perCharacter)
         if not ok then
-            self:Print("Your " .. scope .. " macro slots are full; can't move the macro.")
+            self:Notify("Your " .. scope .. " macro slots are full; can't move the macro.")
             self:RefreshConfig()
             return
         end
@@ -427,7 +509,7 @@ function ns:SetBarScope(bar, perCharacter)
         bar.perCharacter = perCharacter
     end
 
-    self:Print(("Macro \"%s\" is now %s."):format(bar.name, perCharacter and "character-specific" or "account-wide"))
+    self:Notify(("Macro \"%s\" is now %s."):format(bar.name, perCharacter and "character-specific" or "account-wide"), "ok")
     self:RequestScan()
     self:RefreshConfig()
 end
@@ -454,6 +536,7 @@ events:RegisterEvent("ADDON_LOADED")
 events:RegisterEvent("PLAYER_LOGIN")
 events:RegisterEvent("PLAYER_ENTERING_WORLD")
 events:RegisterEvent("PLAYER_REGEN_ENABLED")
+events:RegisterEvent("PLAYER_REGEN_DISABLED")
 for _, e in ipairs({
     "ACTIONBAR_SLOT_CHANGED", "ACTIONBAR_PAGE_CHANGED", "UPDATE_BONUS_ACTIONBAR",
     "UPDATE_MACROS", "EDIT_MODE_LAYOUTS_UPDATED",
@@ -471,10 +554,13 @@ events:SetScript("OnEvent", function(self, event, arg1)
         return
     elseif event == "PLAYER_LOGIN" then
         ns:BuildAll()
-        if not ns.db.welcomed then
-            ns.db.welcomed = true
-            ns:Print("Type /fmd to create popup bars.")
+        if ns.InitLauncher then ns:InitLauncher() end
+        if ns.db.loginMessage ~= false then
+            print(("|cff33ccff%s|r%s - |cffffd100/fmd|r to edit bars, |cffffd100/fmd options|r for settings."):format(
+                ns.TITLE, ns.VERSION ~= "" and (" v" .. ns.VERSION) or ""))
         end
+    elseif event == "PLAYER_REGEN_DISABLED" then
+        ns:RefreshConfig()
     elseif event == "PLAYER_ENTERING_WORLD" then
         -- (not on UPDATE_MACROS: our own EditMacro calls fire that event)
         ns:SyncAllMacros()
@@ -484,7 +570,9 @@ events:SetScript("OnEvent", function(self, event, arg1)
             ns.pendingRefresh = false
             ns:BuildAll()
             ns:SyncAllMacros()
+            ns:ApplyEditMode()
         end
+        ns:RefreshConfig()
         ns:RequestScan()
     else
         ns:RequestScan()
@@ -500,24 +588,38 @@ SLASH_FOREVERMACRODROPDOWN2 = "/macrodropdown"
 SlashCmdList.FOREVERMACRODROPDOWN = function(msg)
     local cmd, rest = (msg or ""):match("^(%S*)%s*(.-)%s*$")
     cmd = cmd:lower()
-    if cmd == "" or cmd == "config" or cmd == "options" then
+    if cmd == "" or cmd == "config" then
         ns:ToggleConfig()
+    elseif cmd == "options" or cmd == "settings" then
+        ns:OpenOptions()
     elseif cmd == "new" then
         local bar = ns:CreateBar(rest)
-        if bar then ns:Print("Created bar \"" .. bar.name .. "\". Open /fmd to add spells and items.") end
+        if bar then
+            ns.selectedBarId = bar.id
+            ns:Print("Created bar \"" .. bar.name .. "\". Open /fmd to add spells and items.")
+        end
     elseif cmd == "list" then
         if #ns.db.bars == 0 then ns:Print("No bars yet.") end
+        local statusText = { placed = "on action bar", unplaced = "not on a visible bar", missing = "macro missing" }
         for _, bar in ipairs(ns.db.bars) do
-            ns:Print(("%s - %d entries, opens %s"):format(bar.name, #bar.entries, bar.direction:lower()))
+            local horizontal = bar.direction == "LEFT" or bar.direction == "RIGHT"
+            ns:Print(("%s - %d entries, opens %s in %d %s, %s"):format(bar.name, #bar.entries, bar.direction:lower(),
+                bar.lines, horizontal and (bar.lines == 1 and "row" or "rows") or (bar.lines == 1 and "column" or "columns"),
+                statusText[ns:BarStatus(bar)]))
         end
     elseif cmd == "scan" then
         ns:ScanAnchors()
         ns:Print("Rescanned action bars.")
+    elseif cmd == "minimap" then
+        ns:SetMinimapShown(ns.db.minimap.hide)
+        ns:Print("Minimap button " .. (ns.db.minimap.hide and "hidden" or "shown") .. ".")
     else
         ns:Print("Commands:")
         print("  /fmd - open the configuration window")
         print("  /fmd new <name> - create a new popup bar")
         print("  /fmd list - list your bars")
         print("  /fmd scan - re-find which action buttons hold your macros")
+        print("  /fmd minimap - show or hide the minimap button")
+        print("  /fmd options - open this addon's page in Options > AddOns")
     end
 end

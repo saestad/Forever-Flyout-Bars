@@ -18,12 +18,13 @@ local ANCHORS = {
     LEFT  = { "RIGHT",  "LEFT",  -GAP,  0   },
 }
 
--- where the first button sits, and the x/y step for the next one
-local STEP = {
-    UP    = { "BOTTOM", 0,  1 },
-    DOWN  = { "TOP",    0, -1 },
-    RIGHT = { "LEFT",   1,  0 },
-    LEFT  = { "RIGHT", -1,  0 },
+-- Grid layout per direction: the popup corner the first button sits in, the x/y step "outward"
+-- (away from the action button) and the x/y step "across" (to the next column/row of the same line).
+local GRID = {
+    UP    = { point = "BOTTOMLEFT", out = { 0,  1 }, across = { 1,  0 } },
+    DOWN  = { point = "TOPLEFT",    out = { 0, -1 }, across = { 1,  0 } },
+    RIGHT = { point = "TOPLEFT",    out = { 1,  0 }, across = { 0, -1 } },
+    LEFT  = { point = "TOPRIGHT",   out = { -1, 0 }, across = { 0, -1 } },
 }
 
 local ACTION_ATTRIBUTES = { "type", "spell", "item", "toy", "macro", "macrotext" }
@@ -37,11 +38,23 @@ local TOGGLE_SNIPPET = [[
     else
         popup:Show()
         local delay = popup:GetAttribute("fmd-autohide")
-        if delay and delay > 0 then
+        -- no auto-hide while the config window is open, so the popup can be adjusted in place
+        if delay and delay > 0 and not popup:GetAttribute("fmd-editing") then
             popup:RegisterAutoHide(delay)
             local anchor = self:GetFrameRef("anchor")
             if anchor then popup:AddToAutoHide(anchor) end
         end
+    end
+]]
+
+-- Run on an open popup when the config window opens / closes.
+local PAUSE_AUTOHIDE = [[ self:UnregisterAutoHide() ]]
+local REARM_AUTOHIDE = [[
+    local delay = self:GetAttribute("fmd-autohide")
+    if delay and delay > 0 then
+        self:RegisterAutoHide(delay)
+        local anchor = self:GetFrameRef("anchor")
+        if anchor then self:AddToAutoHide(anchor) end
     end
 ]]
 
@@ -93,6 +106,25 @@ local function UpdateCount(b, e)
     end
 end
 
+-- Tint like the default action bars: blue when out of power, grey when unusable.
+local function UpdateUsable(b, e)
+    local usable, noPower = true, false
+    if e.type == "spell" then
+        local f = (C_Spell and C_Spell.IsSpellUsable) or IsUsableSpell
+        if f then usable, noPower = f(e.id) end
+    elseif e.type == "item" then
+        local f = (C_Item and C_Item.IsUsableItem) or IsUsableItem
+        if f then usable, noPower = f(e.id) end
+    end
+    if usable then
+        b.icon:SetVertexColor(1, 1, 1)
+    elseif noPower then
+        b.icon:SetVertexColor(0.5, 0.5, 1)
+    else
+        b.icon:SetVertexColor(0.4, 0.4, 0.4)
+    end
+end
+
 function ns:UpdatePopupButtons(fr)
     for _, b in ipairs(fr.buttons) do
         local e = b.entry
@@ -102,15 +134,19 @@ function ns:UpdatePopupButtons(fr)
             -- pcall: some combat values may be "secret" on Midnight-era clients
             pcall(UpdateCooldown, b, e)
             pcall(UpdateCount, b, e)
+            pcall(UpdateUsable, b, e)
         end
     end
 end
 
 local updater = CreateFrame("Frame")
-for _, e in ipairs({ "SPELL_UPDATE_COOLDOWN", "SPELL_UPDATE_USABLE", "BAG_UPDATE_COOLDOWN", "BAG_UPDATE_DELAYED" }) do
+for _, e in ipairs({
+    "SPELL_UPDATE_COOLDOWN", "SPELL_UPDATE_USABLE", "BAG_UPDATE_COOLDOWN", "BAG_UPDATE_DELAYED", "UNIT_POWER_FREQUENT",
+}) do
     pcall(updater.RegisterEvent, updater, e)
 end
-updater:SetScript("OnEvent", function()
+updater:SetScript("OnEvent", function(_, event, unit)
+    if event == "UNIT_POWER_FREQUENT" and unit ~= "player" then return end
     for _, fr in pairs(ns.frames) do
         if fr.popup:IsVisible() then ns:UpdatePopupButtons(fr) end
     end
@@ -170,6 +206,19 @@ function ns:GetFrames(bar)
     popup.bg = popup:CreateTexture(nil, "BACKGROUND")
     popup.bg:SetAllPoints()
     popup.bg:SetColorTexture(0, 0, 0, 0.55)
+    -- 1px border, drawn as four edge textures
+    popup.edges = {}
+    for i, pts in ipairs({
+        { "TOPLEFT", "TOPRIGHT", 0, 1 }, { "BOTTOMLEFT", "BOTTOMRIGHT", 0, -1 },
+        { "TOPLEFT", "BOTTOMLEFT", -1, 0 }, { "TOPRIGHT", "BOTTOMRIGHT", 1, 0 },
+    }) do
+        local t = popup:CreateTexture(nil, "BORDER")
+        t:SetColorTexture(0.45, 0.55, 0.65, 0.8)
+        t:SetPoint(pts[1], popup, pts[1], pts[3], pts[4])
+        t:SetPoint(pts[2], popup, pts[2], pts[3], pts[4])
+        if pts[3] == 0 then t:SetHeight(1) else t:SetWidth(1) end
+        popup.edges[i] = t
+    end
 
     -- Secure "close" button. It is shown only while the popup is open and serves two purposes:
     --  * it covers the screen at BACKGROUND strata (below all other UI), so clicking the game world closes the popup
@@ -198,7 +247,11 @@ function ns:GetFrames(bar)
     toggle:SetScript("PreClick", function() ns:AnchorFromMouse(id) end)
 
     fr = { id = id, popup = popup, toggle = toggle, buttons = {} }
-    popup:HookScript("OnShow", function() ns:UpdatePopupButtons(fr) end)
+    popup:HookScript("OnShow", function()
+        ns:UpdatePopupButtons(fr)
+        ns:RefreshConfig()
+    end)
+    popup:HookScript("OnHide", function() ns:RefreshConfig() end)
 
     self.frames[id] = fr
     return fr
@@ -225,22 +278,28 @@ local function ConfigureButton(b, e, bar)
 end
 
 -- Position the popup's buttons for a given button size (in the popup's own scale).
+-- bar.lines is the number of columns (vertical popups) or rows (horizontal popups).
+-- The line nearest the action button fills first, then the popup grows outward.
 local function LayoutBar(bar, fr, size)
     local popup = fr.popup
     local n, spacing = #bar.entries, bar.spacing
-    local step = STEP[bar.direction] or STEP.UP
+    local g = GRID[bar.direction] or GRID.UP
+    local across = math.max(1, math.min(bar.lines or 1, math.max(n, 1)))
+    local outward = math.max(1, math.ceil(n / across))
+    local stride = size + spacing
 
     for i = 1, n do
         local b = fr.buttons[i]
-        local offset = PAD + (i - 1) * (size + spacing)
+        local o, a = math.floor((i - 1) / across), (i - 1) % across
+        local x = g.out[1] * (PAD + o * stride) + g.across[1] * (PAD + a * stride)
+        local y = g.out[2] * (PAD + o * stride) + g.across[2] * (PAD + a * stride)
         b:SetSize(size, size)
         b:ClearAllPoints()
-        b:SetPoint(step[1], popup, step[1], step[2] * offset, step[3] * offset)
+        b:SetPoint(g.point, popup, g.point, x, y)
     end
 
-    local count = math.max(n, 1)
-    local long = count * size + (count - 1) * spacing + 2 * PAD
-    local short = size + 2 * PAD
+    local long = outward * size + (outward - 1) * spacing + 2 * PAD
+    local short = across * size + (across - 1) * spacing + 2 * PAD
     if bar.direction == "LEFT" or bar.direction == "RIGHT" then
         popup:SetSize(long, short)
     else
@@ -255,6 +314,10 @@ function ns:BuildBar(bar)
     local n = #bar.entries
 
     popup:SetAttribute("fmd-autohide", bar.autoHide or 0)
+    popup:SetAttribute("fmd-editing", self.editing or nil)
+    local showBg = bar.showBackground ~= false
+    popup.bg:SetShown(showBg)
+    for _, t in ipairs(popup.edges) do t:SetShown(showBg) end
 
     for i, entry in ipairs(bar.entries) do
         local b = fr.buttons[i] or self:CreatePopupButton(fr, i)
@@ -330,10 +393,12 @@ function ns:ApplyAnchor(bar, anchor)
         local a = ANCHORS[bar.direction] or ANCHORS.UP
         popup:SetPoint(a[1], anchor, a[2], a[3], a[4])
         SecureHandlerSetFrameRef(fr.toggle, "anchor", anchor)
+        SecureHandlerSetFrameRef(popup, "anchor", anchor)
     else
         -- macro isn't on a visible action button: show near the middle of the screen
         popup:SetPoint("CENTER", UIParent, "CENTER", 0, 150)
         SecureHandlerSetFrameRef(fr.toggle, "anchor", popup)
+        SecureHandlerSetFrameRef(popup, "anchor", popup)
     end
     fr.anchor = anchor
 end
@@ -408,6 +473,33 @@ function ns:IsBarOnActionBar(bar)
 end
 
 ---------------------------------------------------------------------------
+-- Editing mode: while the config window is open, popups stay open
+-- (no auto-hide, no closing on UI clicks) so they can be adjusted on the action bar.
+-- The macro toggle, Escape and world clicks still close them.
+---------------------------------------------------------------------------
+
+function ns:SetEditMode(on)
+    self.editing = on and true or nil
+    self:ApplyEditMode()
+end
+
+function ns:ApplyEditMode()
+    if InCombatLockdown() then self.pendingRefresh = true return end
+    for _, fr in pairs(self.frames) do
+        local popup = fr.popup
+        popup:SetAttribute("fmd-editing", self.editing)
+        if popup:IsShown() and SecureHandlerExecute then
+            SecureHandlerExecute(popup, self.editing and PAUSE_AUTOHIDE or REARM_AUTOHIDE)
+        end
+    end
+end
+
+function ns:IsPopupShown(bar)
+    local fr = self.frames[bar.id]
+    return fr and fr.popup:IsShown()
+end
+
+---------------------------------------------------------------------------
 -- Out of combat: close when clicking any other UI element too
 -- (in combat only world clicks and Escape close it, via the secure closer)
 ---------------------------------------------------------------------------
@@ -415,13 +507,15 @@ end
 local clickWatcher = CreateFrame("Frame")
 pcall(clickWatcher.RegisterEvent, clickWatcher, "GLOBAL_MOUSE_DOWN")
 clickWatcher:SetScript("OnEvent", function()
-    if InCombatLockdown() then return end
+    if InCombatLockdown() or ns.editing then return end
     local focus
     if GetMouseFoci then
         focus = GetMouseFoci()[1]
     elseif GetMouseFocus then
         focus = GetMouseFocus()
     end
+    -- clicking the minimap button opens the config window: keep the popup so it can be edited
+    if focus and focus == ns.minimapButton then return end
     for id, fr in pairs(ns.frames) do
         local popup = fr.popup
         if popup:IsShown() and not popup:IsMouseOver() and focus ~= ns.previewButton
@@ -435,8 +529,23 @@ clickWatcher:SetScript("OnEvent", function()
     end
 end)
 
+-- Show / hide a bar's popup from the config window.
+-- Done directly rather than via fr.toggle:Click(): the toggle is registered for both down and up clicks
+-- (needed for the macro's /click), so a scripted Click() can fire it twice and reopen-then-close the popup.
+-- Showing a secure frame from addon code is allowed out of combat, and its _onshow still binds Escape.
 function ns:PreviewBar(bar)
     if not self:CheckCombat() then return end
+    if not self.frames[bar.id] then self:BuildBar(bar) end
     local fr = self.frames[bar.id]
-    if fr then fr.toggle:Click("LeftButton") end
+    if not fr then return end
+    local popup = fr.popup
+    if popup:IsShown() then
+        popup:Hide()
+        return
+    end
+    self:ApplyAnchor(bar, fr.anchor) -- next to the macro's action button, or screen centre if it isn't on one
+    popup:Show()
+    if not self.editing and SecureHandlerExecute then
+        SecureHandlerExecute(popup, REARM_AUTOHIDE)
+    end
 end

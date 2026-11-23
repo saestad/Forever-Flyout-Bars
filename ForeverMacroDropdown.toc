@@ -1,10 +1,17 @@
 ## Interface: 16001
 ## Title: Forever Macro Dropdown
-## Notes: Create action-bar macros that open a vertical or horizontal popup bar of spells, items, toys and macros.
-## Version: 1.0.0
+## Notes: Create action-bar macros that open a vertical or horizontal popup bar of spells, items, toys, mounts and macros.
+## Version: 1.1.0
+## Author: saestad
+## X-Website: https://github.com/saestad/ForeverMacroDropdown
+## Category: Action Bars
 ## SavedVariables: ForeverMacroDropdownDB
-## IconTexture: 134400
+## IconTexture: Interface\AddOns\ForeverMacroDropdown\Media\Icon
+## AddonCompartmentFunc: ForeverMacroDropdown_OnAddonCompartmentClick
+## AddonCompartmentFuncOnEnter: ForeverMacroDropdown_OnAddonCompartmentEnter
+## AddonCompartmentFuncOnLeave: ForeverMacroDropdown_OnAddonCompartmentLeave
 
 Core.lua
 Popup.lua
 Config.lua
+Launcher.lua
